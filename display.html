@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Display Antrean - Desa Bukit Raya</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: transparent;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* =========================================================
+   AREA UTAMA
+   Rasio 33,12 : 4,36 = 7,596 : 1
+========================================================= */
+
+.display {
+    width: 100vw;
+    aspect-ratio: 7.596 / 1;
+    max-height: 100vh;
+
+    display: grid;
+    grid-template-columns: 16% repeat(4, 18%) 12%;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #f7fbff 55%,
+            #eef7ff 100%
+        );
+
+    border-top: 4px solid #075ca8;
+    border-bottom: 6px solid #075ca8;
+
+    box-shadow:
+        0 5px 18px rgba(0,0,0,.20);
+
+    overflow: hidden;
+}
+
+/* =========================================================
+   PANEL KIRI
+========================================================= */
+
+.brand {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #064d91 0%,
+            #086cc0 55%,
+            #008ee8 100%
+        );
+
+    padding: 5px;
+}
+
+.brand::after {
+    content: "";
+
+    position: absolute;
+
+    right: -18px;
+    top: 0;
+
+    width: 38px;
+    height: 100%;
+
+    background: #ffffff;
+
+    clip-path: polygon(
+        0 0,
+        50% 0,
+        100% 50%,
+        50% 100%,
+        0 100%,
+        45% 50%
+    );
+
+    z-index: 3;
+}
+
+.people-icon {
+    font-size: clamp(24px, 3vw, 58px);
+    line-height: 1;
+    margin-bottom: 3px;
+}
+
+.brand-title {
+    font-size: clamp(15px, 1.75vw, 34px);
+    font-weight: 900;
+    line-height: .95;
+    text-align: center;
+    letter-spacing: -.5px;
+}
+
+.brand-name {
+    margin-top: 7px;
+
+    background: #ffd900;
+    color: #111;
+
+    padding: 4px 12px;
+
+    border-radius: 5px;
+
+    font-size: clamp(10px, 1.1vw, 22px);
+    font-weight: 900;
+
+    white-space: nowrap;
+}
+
+/* =========================================================
+   KARTU LOKET
+========================================================= */
+
+.counter {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: space-between;
+
+    padding: 9px 12px 8px;
+
+    border-right: 2px solid #1683d3;
+
+    background: rgba(255,255,255,.94);
+
+    min-width: 0;
+}
+
+.counter:last-of-type {
+    border-right: none;
+}
+
+/* label loket */
+
+.counter-header {
+    width: 78%;
+
+    margin: 0 auto;
+
+    padding: 5px 4px;
+
+    border-radius: 10px;
+
+    color: white;
+
+    text-align: center;
+
+    font-size: clamp(12px, 1.45vw, 28px);
+    font-weight: 900;
+
+    line-height: 1;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.35),
+        0 2px 5px rgba(0,0,0,.15);
+}
+
+/* warna tiap loket */
+
+.counter-a .counter-header {
+    background: linear-gradient(180deg,#2d8be0,#0965b8);
+}
+
+.counter-b .counter-header {
+    background: linear-gradient(180deg,#18bd69,#00934d);
+}
+
+.counter-c .counter-header {
+    background: linear-gradient(180deg,#ff9a20,#f46c00);
+}
+
+.counter-d .counter-header {
+    background: linear-gradient(180deg,#8b4be1,#5921ae);
+}
+
+/* nomor */
+
+.queue-number {
+    text-align: center;
+
+    font-size: clamp(24px, 3.2vw, 64px);
+
+    font-weight: 900;
+
+    line-height: .9;
+
+    letter-spacing: -1.5px;
+
+    color: #111;
+
+    white-space: nowrap;
+}
+
+/* nama */
+
+.customer {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    min-width: 0;
+}
+
+.customer-icon {
+    flex: 0 0 auto;
+
+    width: clamp(18px, 1.6vw, 32px);
+    height: clamp(18px, 1.6vw, 32px);
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: white;
+
+    font-size: clamp(9px, .8vw, 16px);
+}
+
+.counter-a .customer-icon {
+    background: #0874cf;
+}
+
+.counter-b .customer-icon {
+    background: #08a85a;
+}
+
+.counter-c .customer-icon {
+    background: #f47700;
+}
+
+.counter-d .customer-icon {
+    background: #6529b9;
+}
+
+.customer-name {
+    font-size: clamp(10px, 1.15vw, 23px);
+
+    font-weight: 900;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    color: #111;
+}
+
+/* jumlah menunggu */
+
+.waiting {
+    align-self: center;
+
+    width: 78%;
+
+    padding: 5px 7px;
+
+    border-radius: 12px;
+
+    text-align: center;
+
+    font-size: clamp(9px, 1vw, 20px);
+
+    font-weight: 900;
+
+    white-space: nowrap;
+}
+
+.counter-a .waiting {
+    color: #0867b7;
+    background: #ddecfa;
+}
+
+.counter-b .waiting {
+    color: #078c4c;
+    background: #dcf7e9;
+}
+
+.counter-c .waiting {
+    color: #e96300;
+    background: #fff0e4;
+}
+
+.counter-d .waiting {
+    color: #6124b1;
+    background: #eee4fb;
+}
+
+/* =========================================================
+   PANEL KANAN
+========================================================= */
+
+.graphic {
+    position: relative;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #eef7ff 50%,
+            #dcefff 100%
+        );
+}
+
+/* bentuk geometris */
+
+.graphic::before {
+    content: "";
+
+    position: absolute;
+
+    width: 85%;
+    height: 170%;
+
+    right: -25%;
+    top: -35%;
+
+    background:
+        linear-gradient(
+            135deg,
+            transparent 30%,
+            rgba(0,128,220,.12) 31%,
+            rgba(0,128,220,.12) 55%,
+            transparent 56%
+        );
+
+    transform: rotate(8deg);
+}
+
+.graphic::after {
+    content: "";
+
+    position: absolute;
+
+    width: 45px;
+    height: 45px;
+
+    right: 25%;
+    top: 25%;
+
+    background: #ffd52b;
+
+    transform: rotate(45deg);
+
+    border-radius: 5px;
+
+    box-shadow:
+        0 0 0 7px rgba(255,213,43,.12);
+}
+
+/* garis dekorasi */
+
+.graphic-line {
+    position: absolute;
+
+    width: 90px;
+    height: 8px;
+
+    right: 7%;
+    bottom: 20%;
+
+    background: #087bd0;
+
+    transform: rotate(-45deg);
+
+    border-radius: 5px;
+}
+
+.graphic-line.two {
+    width: 55px;
+
+    right: 16%;
+    bottom: 38%;
+
+    background: #ffd52b;
+}
+
+/* =========================================================
+   STATUS PANGGILAN
+========================================================= */
+
+.counter.active {
+    animation: pulseCounter 1.2s ease-in-out infinite;
+    z-index: 5;
+}
+
+.counter.active::before {
+    content: "DIPANGGIL";
+
+    position: absolute;
+
+    top: 4px;
+    right: 4px;
+
+    background: #ffcf00;
+    color: #111;
+
+    padding: 3px 7px;
+
+    border-radius: 5px;
+
+    font-size: clamp(7px,.7vw,14px);
+
+    font-weight: 900;
+
+    z-index: 10;
+}
+
+@keyframes pulseCounter {
+
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.025);
+        box-shadow: 0 0 25px rgba(255,193,7,.8);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+
+}
+
+/* =========================================================
+   KETIKA BELUM ADA ANTREAN
+========================================================= */
+
+.empty {
+    color: #a1a1a1;
+
+    font-size: clamp(10px,1vw,20px);
+
+    font-weight: 700;
+
+    text-align: center;
+
+    margin: auto;
+}
+
+/* =========================================================
+   TOMBOL SUARA
+========================================================= */
+
+.voice-button {
+
+    position: fixed;
+
+    right: 15px;
+    bottom: 15px;
+
+    border: none;
+
+    background: #075ca8;
+
+    color: white;
+
+    padding: 8px 15px;
+
+    border-radius: 20px;
+
+    font-size: 13px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow: 0 3px 10px rgba(0,0,0,.25);
+
+    z-index: 100;
+
+}
+
+.voice-button.enabled {
+    background: #08a85a;
+}
+
+/* sembunyikan tombol ketika fullscreen */
+
+body.fullscreen .voice-button {
+    display: none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="display">
+
+    <!-- =====================================================
+         BRAND
+    ====================================================== -->
+
+    <div class="brand">
+
+        <div class="people-icon">👥</div>
+
+        <div class="brand-title">
+            ANTREAN<br>
+            PELAYANAN
+        </div>
+
+        <div class="brand-name">
+            DESA BUKIT RAYA
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         LOKET A
+    ====================================================== -->
+
+    <div class="counter counter-a" id="counter-A">
+
+        <div class="counter-header">
+            LOKET A
+        </div>
+
+        <div class="queue-number" id="number-A">
+            —
+        </div>
+
+        <div class="customer">
+
+            <div class="customer-icon">
+                👤
+            </div>
+
+            <div class="customer-name" id="name-A">
+                Belum ada antrean
+            </div>
+
+        </div>
+
+        <div class="waiting">
+            MENUNGGU: <span id="waiting-A">0</span>
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         LOKET B
+    ====================================================== -->
+
+    <div class="counter counter-b" id="counter-B">
+
+        <div class="counter-header">
+            LOKET B
+        </div>
+
+        <div class="queue-number" id="number-B">
+            —
+        </div>
+
+        <div class="customer">
+
+            <div class="customer-icon">
+                👤
+            </div>
+
+            <div class="customer-name" id="name-B">
+                Belum ada antrean
+            </div>
+
+        </div>
+
+        <div class="waiting">
+            MENUNGGU: <span id="waiting-B">0</span>
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         LOKET C
+    ====================================================== -->
+
+    <div class="counter counter-c" id="counter-C">
+
+        <div class="counter-header">
+            LOKET C
+        </div>
+
+        <div class="queue-number" id="number-C">
+            —
+        </div>
+
+        <div class="customer">
+
+            <div class="customer-icon">
+                👤
+            </div>
+
+            <div class="customer-name" id="name-C">
+                Belum ada antrean
+            </div>
+
+        </div>
+
+        <div class="waiting">
+            MENUNGGU: <span id="waiting-C">0</span>
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         LOKET D
+    ====================================================== -->
+
+    <div class="counter counter-d" id="counter-D">
+
+        <div class="counter-header">
+            LOKET D
+        </div>
+
+        <div class="queue-number" id="number-D">
+            —
+        </div>
+
+        <div class="customer">
+
+            <div class="customer-icon">
+                👤
+            </div>
+
+            <div class="customer-name" id="name-D">
+                Belum ada antrean
+            </div>
+
+        </div>
+
+        <div class="waiting">
+            MENUNGGU: <span id="waiting-D">0</span>
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         GRAFIS KANAN
+    ====================================================== -->
+
+    <div class="graphic">
+
+        <div class="graphic-line"></div>
+        <div class="graphic-line two"></div>
+
+    </div>
+
+</div>
+
+
+<!-- tombol aktivasi suara -->
+
+<button
+    class="voice-button"
+    id="voiceButton"
+    onclick="aktifkanSuara()"
+>
+    🔊 AKTIFKAN SUARA
+</button>
+
+
+<script>
+
+/* =========================================================
+   SUPABASE
+========================================================= */
+
+const SUPABASE_URL =
+    "https://pyawggjlbrvneflpsalj.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_5SdvMobBB2AvtXcJd_Scxw_rVsoqM8R";
+
+const db =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+    );
+
+
+/* =========================================================
+   KONFIGURASI
+========================================================= */
+
+const LOKET = ["A", "B", "C", "D"];
+
+let dataSebelumnya = {
+    A: null,
+    B: null,
+    C: null,
+    D: null
+};
+
+let pertamaKali = true;
+
+let suaraAktif = false;
+
+
+/* =========================================================
+   AKTIFKAN SUARA
+========================================================= */
+
+function aktifkanSuara() {
+
+    suaraAktif = true;
+
+    const button =
+        document.getElementById("voiceButton");
+
+    button.innerHTML =
+        "🔊 SUARA AKTIF";
+
+    button.classList.add("enabled");
+
+    const ucapan =
+        new SpeechSynthesisUtterance(
+            "Suara antrean pelayanan Desa Bukit Raya telah aktif."
+        );
+
+    ucapan.lang = "id-ID";
+    ucapan.rate = .9;
+    ucapan.pitch = 1;
+
+    window.speechSynthesis.cancel();
+
+    window.speechSynthesis.speak(ucapan);
+
+}
+
+
+/* =========================================================
+   UCAPAN ANTREAN
+========================================================= */
+
+function bicaraAntrean(data) {
+
+    if (!suaraAktif) {
+        return;
+    }
+
+    if (!data) {
+        return;
+    }
+
+    const nomor =
+        data.queue_code || "";
+
+    const nama =
+        data.customer_name || "";
+
+    const loket =
+        data.counter_code || "";
+
+    const ucapan =
+        new SpeechSynthesisUtterance(
+            "Nomor antrean " +
+            nomor.replace("-", " ") +
+            ", atas nama " +
+            nama +
+            ", silakan menuju Loket " +
+            loket +
+            "."
+        );
+
+    ucapan.lang = "id-ID";
+
+    ucapan.rate = .82;
+
+    ucapan.pitch = 1;
+
+    ucapan.volume = 1;
+
+    window.speechSynthesis.cancel();
+
+    window.speechSynthesis.speak(ucapan);
+
+}
+
+
+/* =========================================================
+   AMBIL ANTREAN AKTIF PER LOKET
+========================================================= */
+
+async function ambilAntreanAktif(kode) {
+
+    const {
+        data,
+        error
+    } = await db.rpc(
+        "get_antrean_aktif_loket",
+        {
+            p_counter_code: kode
+        }
+    );
+
+    if (error) {
+
+        console.error(
+            "Gagal mengambil antrean " +
+            kode,
+            error
+        );
+
+        return null;
+    }
+
+    if (!data) {
+        return null;
+    }
+
+    if (
+        typeof data === "object" &&
+        Object.keys(data).length === 0
+    ) {
+        return null;
+    }
+
+    return data;
+
+}
+
+
+/* =========================================================
+   TAMPILKAN ANTREAN
+========================================================= */
+
+function tampilkanAntrean(kode, data) {
+
+    const number =
+        document.getElementById(
+            "number-" + kode
+        );
+
+    const name =
+        document.getElementById(
+            "name-" + kode
+        );
+
+    const counter =
+        document.getElementById(
+            "counter-" + kode
+        );
+
+
+    if (!data) {
+
+        number.innerText = "—";
+
+        name.innerText =
+            "Belum ada antrean";
+
+        counter.classList.remove(
+            "active"
+        );
+
+        return;
+    }
+
+
+    number.innerText =
+        data.queue_code || "—";
+
+
+    name.innerText =
+        data.customer_name ||
+        "Warga";
+
+
+}
+
+
+/* =========================================================
+   CEK ANTREAN AKTIF
+========================================================= */
+
+async function cekAntreanAktif() {
+
+    for (const kode of LOKET) {
+
+        const data =
+            await ambilAntreanAktif(kode);
+
+
+        tampilkanAntrean(
+            kode,
+            data
+        );
+
+
+        /*
+         * Jangan bicara saat halaman
+         * pertama kali dibuka.
+         */
+
+        if (!pertamaKali) {
+
+            const sebelumnya =
+                dataSebelumnya[kode];
+
+
+            const idSekarang =
+                data?.queue_id || null;
+
+
+            const idSebelumnya =
+                sebelumnya?.queue_id || null;
+
+
+            if (
+                idSekarang &&
+                idSekarang !== idSebelumnya
+            ) {
+
+                const counter =
+                    document.getElementById(
+                        "counter-" + kode
+                    );
+
+                counter.classList.add(
+                    "active"
+                );
+
+
+                setTimeout(
+                    () => {
+
+                        counter.classList.remove(
+                            "active"
+                        );
+
+                    },
+                    7000
+                );
+
+
+                bicaraAntrean(data);
+
+            }
+
+        }
+
+
+        dataSebelumnya[kode] =
+            data;
+
+    }
+
+
+    pertamaKali = false;
+
+}
+
+
+/* =========================================================
+   JUMLAH ANTREAN MENUNGGU
+========================================================= */
+
+async function cekAntreanMenunggu() {
+
+    const hariIni =
+        new Date()
+        .toLocaleDateString(
+            "en-CA",
+            {
+                timeZone:
+                    "Asia/Makassar"
+            }
+        );
+
+
+    const {
+        data,
+        error
+    } = await db
+        .from("queues")
+        .select(
+            "id,counter_id,status,queue_date"
+        )
+        .eq(
+            "queue_date",
+            hariIni
+        )
+        .eq(
+            "status",
+            "waiting"
+        );
+
+
+    if (error) {
+
+        console.error(
+            "Gagal mengambil jumlah antrean",
+            error
+        );
+
+        return;
+    }
+
+
+    const jumlah = {
+        A: 0,
+        B: 0,
+        C: 0,
+        D: 0
+    };
+
+
+    /*
+     * Berdasarkan data counter:
+     *
+     * 1 = A
+     * 2 = B
+     * 3 = C
+     * 4 = D
+     */
+
+    data.forEach(
+        antrean => {
+
+            const kode =
+                {
+                    1: "A",
+                    2: "B",
+                    3: "C",
+                    4: "D"
+                }[
+                    antrean.counter_id
+                ];
+
+
+            if (kode) {
+                jumlah[kode]++;
+            }
+
+        }
+    );
+
+
+    for (const kode of LOKET) {
+
+        document.getElementById(
+            "waiting-" + kode
+        ).innerText =
+            jumlah[kode];
+
+    }
+
+}
+
+
+/* =========================================================
+   UPDATE DATA
+========================================================= */
+
+async function updateDisplay() {
+
+    await cekAntreanAktif();
+
+    await cekAntreanMenunggu();
+
+}
+
+
+/* =========================================================
+   MULAI
+========================================================= */
+
+updateDisplay();
+
+
+/*
+ * Update setiap 2 detik.
+ */
+
+setInterval(
+    updateDisplay,
+    2000
+);
+
+
+/* =========================================================
+   FULLSCREEN
+========================================================= */
+
+document.addEventListener(
+    "dblclick",
+    () => {
+
+        if (
+            !document.fullscreenElement
+        ) {
+
+            document.documentElement
+                .requestFullscreen();
+
+            document.body
+                .classList.add(
+                    "fullscreen"
+                );
+
+        } else {
+
+            document.exitFullscreen();
+
+            document.body
+                .classList.remove(
+                    "fullscreen"
+                );
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>
