@@ -4,712 +4,196 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Antrean Pelayanan - Desa Bukit Raya</title>
-
 <style>
-:root{
-  --blue:#0b3b82;
-  --blue2:#1261b5;
-  --yellow:#f5c400;
-  --light:#f5f8fc;
-  --white:#ffffff;
-  --text:#17324d;
-  --muted:#6d7d8d;
-  --border:#dfe7f0;
-  --success:#16834b;
-  --danger:#c73535;
-  --shadow:0 10px 30px rgba(16,53,92,.10);
-}
-
+:root{--blue:#0b3b82;--blue2:#1261b5;--yellow:#f5c400;--light:#f5f8fc;--white:#fff;--text:#17324d;--muted:#6d7d8d;--border:#dfe7f0;--success:#16834b;--danger:#c73535;--shadow:0 10px 30px rgba(16,53,92,.10)}
 *{box-sizing:border-box}
-
-body{
-  margin:0;
-  font-family:Arial,Helvetica,sans-serif;
-  background:linear-gradient(180deg,#eef5fc 0%,#f8fafc 100%);
-  color:var(--text);
-}
-
-.container{
-  width:min(1180px,calc(100% - 28px));
-  margin:0 auto;
-  padding:28px 0 45px;
-}
-
-.hero{
-  background:linear-gradient(135deg,var(--blue),#0b5da9);
-  color:white;
-  border-radius:24px;
-  padding:30px;
-  box-shadow:var(--shadow);
-  position:relative;
-  overflow:hidden;
-}
-
-.hero:after{
-  content:"";
-  position:absolute;
-  width:260px;
-  height:260px;
-  border:55px solid rgba(255,255,255,.08);
-  border-radius:50%;
-  right:-90px;
-  top:-100px;
-}
-
-.badge{
-  display:inline-block;
-  background:rgba(245,196,0,.98);
-  color:#17324d;
-  font-weight:800;
-  padding:7px 13px;
-  border-radius:999px;
-  font-size:13px;
-  margin-bottom:12px;
-}
-
-.hero h1{
-  margin:0 0 8px;
-  font-size:clamp(28px,5vw,46px);
-  line-height:1.05;
-}
-
-.hero p{
-  margin:0;
-  color:rgba(255,255,255,.88);
-  font-size:16px;
-  max-width:700px;
-  line-height:1.6;
-}
-
-.layout{
-  display:grid;
-  grid-template-columns:1fr 1.35fr;
-  gap:22px;
-  margin-top:22px;
-  align-items:start;
-}
-
-.card{
-  background:var(--white);
-  border:1px solid var(--border);
-  border-radius:20px;
-  box-shadow:var(--shadow);
-  padding:23px;
-}
-
-.card h2{
-  margin:0 0 6px;
-  color:var(--blue);
-  font-size:23px;
-}
-
-.card-subtitle{
-  margin:0 0 20px;
-  color:var(--muted);
-  font-size:14px;
-  line-height:1.5;
-}
-
-label{
-  display:block;
-  font-weight:700;
-  margin:16px 0 8px;
-}
-
-input,select{
-  width:100%;
-  border:1px solid #cbd7e4;
-  border-radius:12px;
-  padding:13px 14px;
-  font-size:15px;
-  outline:none;
-  background:white;
-}
-
-input:focus,select:focus{
-  border-color:var(--blue2);
-  box-shadow:0 0 0 3px rgba(18,97,181,.10);
-}
-
-.primary-btn{
-  width:100%;
-  border:0;
-  border-radius:13px;
-  padding:14px 16px;
-  margin-top:20px;
-  background:var(--yellow);
-  color:#17324d;
-  font-size:16px;
-  font-weight:800;
-  cursor:pointer;
-}
-
-.primary-btn:hover{filter:brightness(.97)}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#eef5fc 0%,#f8fafc 100%);color:var(--text)}
+.container{width:min(1180px,calc(100% - 28px));margin:auto;padding:28px 0 45px}
+.hero{background:linear-gradient(135deg,var(--blue),#0b5da9);color:#fff;border-radius:24px;padding:30px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;width:260px;height:260px;border:55px solid rgba(255,255,255,.08);border-radius:50%;right:-90px;top:-100px}
+.badge{display:inline-block;background:var(--yellow);color:#17324d;font-weight:800;padding:7px 13px;border-radius:999px;font-size:13px;margin-bottom:12px}
+.hero h1{margin:0 0 8px;font-size:clamp(28px,5vw,46px);line-height:1.05}
+.hero p{margin:0;color:rgba(255,255,255,.88);font-size:16px;max-width:700px;line-height:1.6}
+.layout{display:grid;grid-template-columns:1fr 1.35fr;gap:22px;margin-top:22px;align-items:start}
+.card{background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);padding:23px}
+.card h2{margin:0 0 6px;color:var(--blue);font-size:23px}
+.card-subtitle{margin:0 0 20px;color:var(--muted);font-size:14px;line-height:1.5}
+label{display:block;font-weight:700;margin:16px 0 8px}
+input,select{width:100%;border:1px solid #cbd7e4;border-radius:12px;padding:13px 14px;font-size:15px;outline:none;background:#fff}
+input:focus,select:focus{border-color:var(--blue2);box-shadow:0 0 0 3px rgba(18,97,181,.10)}
+.primary-btn{width:100%;border:0;border-radius:13px;padding:14px 16px;margin-top:20px;background:var(--yellow);color:#17324d;font-size:16px;font-weight:800;cursor:pointer}
 .primary-btn:disabled{opacity:.6;cursor:not-allowed}
-
-.status{
-  display:none;
-  margin-top:14px;
-  padding:12px 14px;
-  border-radius:12px;
-  font-size:14px;
-  line-height:1.5;
-}
-
-.status.show{display:block}
-.status.error{background:#fff0f0;color:var(--danger)}
-.status.success{background:#edf9f2;color:var(--success)}
-
-.ticket{
-  display:none;
-  margin-top:18px;
-  border:2px dashed #c8d7e8;
-  border-radius:18px;
-  padding:20px;
-  text-align:center;
-  background:#f8fbff;
-}
-
-.ticket.show{display:block}
-
-.ticket .small{
-  color:var(--muted);
-  font-size:13px;
-}
-
-.ticket .number{
-  color:var(--blue);
-  font-size:54px;
-  line-height:1;
-  font-weight:900;
-  margin:8px 0;
-}
-
-.ticket .name{
-  font-size:19px;
-  font-weight:800;
-}
-
-.info-head{
-  display:flex;
-  justify-content:space-between;
-  gap:15px;
-  align-items:flex-start;
-  margin-bottom:17px;
-}
-
-.counter-badge{
-  white-space:nowrap;
-  background:#eaf2fb;
-  color:var(--blue);
-  padding:8px 11px;
-  border-radius:10px;
-  font-weight:800;
-  font-size:13px;
-}
-
-.category-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:11px;
-}
-
-.category{
-  border:1px solid var(--border);
-  background:#fff;
-  border-radius:14px;
-  padding:15px;
-  cursor:pointer;
-  transition:.18s ease;
-}
-
-.category:hover{
-  border-color:#9eb9d8;
-  transform:translateY(-1px);
-}
-
-.category.active{
-  border:2px solid var(--blue2);
-  background:#f2f7fd;
-}
-
-.category strong{
-  display:block;
-  color:var(--blue);
-  font-size:15px;
-}
-
-.category span{
-  display:block;
-  color:var(--muted);
-  font-size:12px;
-  margin-top:5px;
-}
-
-.service-box{
-  margin-top:18px;
-  border-top:1px solid var(--border);
-  padding-top:18px;
-}
-
-.service-box h3{
-  margin:0 0 12px;
-  color:var(--blue);
-  font-size:17px;
-}
-
-.service-list{
-  display:grid;
-  gap:9px;
-  max-height:390px;
-  overflow:auto;
-  padding-right:4px;
-}
-
-.service-item{
-  display:flex;
-  gap:10px;
-  align-items:flex-start;
-  background:#f7f9fc;
-  border-radius:11px;
-  padding:11px 12px;
-  font-size:14px;
-  line-height:1.45;
-}
-
-.service-item .dot{
-  flex:0 0 8px;
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:var(--yellow);
-  margin-top:6px;
-}
-
-.empty{
-  color:var(--muted);
-  background:#f7f9fc;
-  padding:14px;
-  border-radius:12px;
-  font-size:14px;
-}
-
-.note{
-  margin-top:16px;
-  color:var(--muted);
-  font-size:12px;
-  line-height:1.5;
-}
-
-.footer{
-  text-align:center;
-  color:var(--muted);
-  font-size:12px;
-  margin-top:22px;
-}
-
+.status{display:none;margin-top:14px;padding:12px 14px;border-radius:12px;font-size:14px;line-height:1.5}
+.status.show{display:block}.status.error{background:#fff0f0;color:var(--danger)}.status.success{background:#edf9f2;color:var(--success)}
+.ticket{display:none;margin-top:18px;border:2px dashed #c8d7e8;border-radius:18px;padding:20px;text-align:center;background:#f8fbff}
+.ticket.show{display:block}.ticket .small{color:var(--muted);font-size:13px}.ticket .number{color:var(--blue);font-size:54px;line-height:1;font-weight:900;margin:8px 0}.ticket .name{font-size:19px;font-weight:800}
+.info-head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;margin-bottom:17px}
+.counter-badge{white-space:nowrap;background:#eaf2fb;color:var(--blue);padding:8px 11px;border-radius:10px;font-weight:800;font-size:13px}
+.category-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+.category{border:1px solid var(--border);background:#fff;border-radius:14px;padding:15px;cursor:pointer;transition:.18s}
+.category:hover{border-color:#9eb9d8;transform:translateY(-1px)}
+.category.active{border:2px solid var(--blue2);background:#f2f7fd}
+.category strong{display:block;color:var(--blue);font-size:15px}.category span{display:block;color:var(--muted);font-size:12px;margin-top:5px}
+.service-box{margin-top:18px;border-top:1px solid var(--border);padding-top:18px}
+.service-box h3{margin:0 0 12px;color:var(--blue);font-size:17px}
+.service-list{display:grid;gap:9px;max-height:390px;overflow:auto;padding-right:4px}
+.service-item{display:flex;gap:10px;align-items:flex-start;background:#f7f9fc;border-radius:11px;padding:11px 12px;font-size:14px;line-height:1.45}
+.service-item .dot{flex:0 0 8px;width:8px;height:8px;border-radius:50%;background:var(--yellow);margin-top:6px}
+.empty{color:var(--muted);background:#f7f9fc;padding:14px;border-radius:12px;font-size:14px}
+.note{margin-top:16px;color:var(--muted);font-size:12px;line-height:1.5}.footer{text-align:center;color:var(--muted);font-size:12px;margin-top:22px}
 @media(max-width:850px){
-  .layout{grid-template-columns:1fr}
-
-  /* Mobile: use the page's natural vertical scroll */
-  .service-list{
-    max-height:none;
-    overflow:visible;
-    padding-right:0;
-    -webkit-overflow-scrolling:touch;
-    touch-action:pan-y;
-  }
+ .container{width:calc(100% - 18px);padding-top:14px}
+ .layout{grid-template-columns:1fr}
+ .service-list{max-height:none;overflow:visible;padding-right:0}
+ .hero{padding:23px 20px;border-radius:19px}
+ .card{padding:18px;border-radius:17px}
 }
-
-@media(max-width:520px){
-  .container{width:min(100% - 18px,1180px);padding-top:12px}
-  .hero{padding:23px 20px;border-radius:19px}
-  .card{padding:18px;border-radius:17px}
-  .category-grid{grid-template-columns:1fr}
-  .ticket .number{font-size:46px}
-}
+@media(max-width:520px){.category-grid{grid-template-columns:1fr}.ticket .number{font-size:46px}}
 </style>
 </head>
-
 <body>
 <div class="container">
+<section class="hero">
+<span class="badge">PELAYANAN DESA</span>
+<h1>Antrean Pelayanan</h1>
+<p>Ambil nomor antrean secara online dan pilih jenis pelayanan yang ingin Anda urus di Desa Bukit Raya.</p>
+</section>
 
-  <section class="hero">
-    <span class="badge">PELAYANAN DESA</span>
-    <h1>Antrean Pelayanan</h1>
-    <p>
-      Ambil nomor antrean secara online dan pilih jenis pelayanan
-      yang ingin Anda urus di Desa Bukit Raya.
-    </p>
-  </section>
+<div class="layout">
+<section class="card">
+<h2>Ambil Nomor Antrean</h2>
+<p class="card-subtitle">Isi nama dan pilih kategori pelayanan. Nomor antrean akan diberikan secara otomatis.</p>
+<label for="customerName">Nama Pemohon</label>
+<input id="customerName" type="text" maxlength="100" placeholder="Masukkan nama lengkap" autocomplete="name">
+<label for="serviceSelect">Kategori Pelayanan</label>
+<select id="serviceSelect"><option value="">Memuat pelayanan...</option></select>
+<button class="primary-btn" id="takeQueueBtn" onclick="ambilNomor()">AMBIL NOMOR ANTREAN</button>
+<div id="statusBox" class="status"></div>
+<div id="ticket" class="ticket">
+<div class="small">NOMOR ANTREAN ANDA</div>
+<div id="ticketNumber" class="number">-</div>
+<div id="ticketName" class="name">-</div>
+<div id="ticketService" class="small" style="margin-top:7px">-</div>
+<div id="ticketCounter" class="small" style="margin-top:3px">-</div>
+</div>
+<div class="note">Mohon simpan nomor antrean Anda dan tunggu panggilan pada layar antrean.</div>
+</section>
 
-  <div class="layout">
-
-    <!-- FORM ANTREAN -->
-    <section class="card">
-      <h2>Ambil Nomor Antrean</h2>
-      <p class="card-subtitle">
-        Isi nama dan pilih kategori pelayanan. Nomor antrean akan
-        diberikan secara otomatis.
-      </p>
-
-      <label for="customerName">Nama Pemohon</label>
-      <input
-        id="customerName"
-        type="text"
-        maxlength="100"
-        placeholder="Masukkan nama lengkap"
-        autocomplete="name"
-      >
-
-      <label for="serviceSelect">Kategori Pelayanan</label>
-      <select id="serviceSelect">
-        <option value="">Memuat pelayanan...</option>
-      </select>
-
-      <button class="primary-btn" id="takeQueueBtn" onclick="ambilNomor()">
-        AMBIL NOMOR ANTREAN
-      </button>
-
-      <div id="statusBox" class="status"></div>
-
-      <div id="ticket" class="ticket">
-        <div class="small">NOMOR ANTREAN ANDA</div>
-        <div id="ticketNumber" class="number">-</div>
-        <div id="ticketName" class="name">-</div>
-        <div id="ticketService" class="small" style="margin-top:7px;">-</div>
-        <div id="ticketCounter" class="small" style="margin-top:3px;">-</div>
-      </div>
-
-      <div class="note">
-        Mohon simpan nomor antrean Anda dan tunggu panggilan pada layar antrean.
-      </div>
-    </section>
-
-    <!-- INFORMASI PELAYANAN -->
-    <section class="card">
-      <div class="info-head">
-        <div>
-          <h2>Informasi Pelayanan</h2>
-          <p class="card-subtitle" style="margin-bottom:0;">
-            Pilih kategori untuk melihat jenis layanan yang tersedia.
-          </p>
-        </div>
-        <div id="counterBadge" class="counter-badge">-</div>
-      </div>
-
-      <div id="categoryGrid" class="category-grid"></div>
-
-      <div class="service-box">
-        <h3 id="serviceTitle">Pilih kategori pelayanan</h3>
-        <div id="serviceList" class="service-list">
-          <div class="empty">
-            Pilih salah satu kategori di atas untuk melihat daftar layanan.
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </div>
-
-  <div class="footer">
-    Pemerintah Desa Bukit Raya
-  </div>
+<section class="card">
+<div class="info-head">
+<div><h2>Informasi Pelayanan</h2><p class="card-subtitle" style="margin-bottom:0">Pilih kategori untuk melihat jenis layanan yang tersedia.</p></div>
+<div id="counterBadge" class="counter-badge">-</div>
+</div>
+<div id="categoryGrid" class="category-grid"></div>
+<div class="service-box">
+<h3 id="serviceTitle">Pilih kategori pelayanan</h3>
+<div id="serviceList" class="service-list"><div class="empty">Pilih salah satu kategori di atas untuk melihat daftar layanan.</div></div>
+</div>
+</section>
+</div>
+<div class="footer">Pemerintah Desa Bukit Raya</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
-const SUPABASE_URL = "https://pyawggjlbrvneflpsalj.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_5SdvMobBB2AvtXcJd_Scxw_rVsoqM8R";
+const SUPABASE_URL="https://pyawggjlbrvneflpsalj.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_5SdvMobBB2AvtXcJd_Scxw_rVsoqM8R";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 
-const db = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_PUBLISHABLE_KEY
-);
-
-/*
-  DAFTAR INFORMASI PELAYANAN
-  Catatan:
-  - Daftar ini hanya informasi untuk warga.
-  - Yang menjadi pilihan antrean tetap 6 kategori pelayanan
-    yang tersimpan di tabel services Supabase.
-*/
-const SERVICE_INFO = {
-  "Administrasi Kependudukan": [
-    "Batal Pindah Kabupaten Kota",
-    "Cetak Ulang Kartu Keluarga karena Hilang, Rusak, atau Versi Kode Batang (Barcode)",
-    "Gabung Kartu Keluarga karena Perkawinan",
-    "Pecah Kartu Keluarga",
-    "Pembaharuan Kartu Identitas Anak bagi Anak Berusia 5 Tahun ke Atas",
-    "Penduduk Nonpermanen bagi Penduduk Luar Kabupaten Penajam Paser Utara Berdomisili Sementara",
-    "Penerbitan Akta Kelahiran, Kartu Identitas Anak, dan Kartu Keluarga",
-    "Penerbitan Akta Kematian dan Kartu Keluarga bagi Keluarga yang Ditinggalkan",
-    "Penerbitan Kartu Keluarga bagi Penduduk Pindah Datang Antarkabupaten Kota",
-    "Penerbitan Surat Keterangan Domisili bagi Penduduk Kabupaten Penajam Paser Utara Berdomisili Sementara",
-    "Perubahan Elemen Data Kependudukan",
-    "Pindah RT, Pindah Desa/Kelurahan, Pindah Kecamatan, dan Pindah Kabupaten/Kota",
-    "Pisah Kartu Keluarga karena Perceraian"
-  ],
-
-  "Administrasi Pernikahan": [
-    "Penerbitan Pengantar Surat Nikah",
-    "Penerbitan Surat Keterangan Status Perkawinan"
-  ],
-
-  "Administrasi Umum": [
-    "Legalisasi Dokumen",
-    "Penerbitan Pengantar Surat Izin Keramaian",
-    "Penerbitan Pengantar Surat Keterangan Catatan Kepolisian",
-    "Penerbitan Surat Keterangan Beda Nama",
-    "Penerbitan Surat Keterangan Domisili Organisasi Instansi Perusahaan",
-    "Penerbitan Surat Keterangan Gaib",
-    "Penerbitan Surat Keterangan Pekerjaan",
-    "Penerbitan Surat Pernyataan Ahli Waris, Surat Keterangan Ahli Waris, dan Surat Kuasa Ahli Waris"
-  ],
-
-  "Kesejahteraan": [
-    "Penerbitan Surat Keterangan Penghasilan",
-    "Penerbitan Surat Keterangan Tidak Mampu",
-    "Penerbitan Surat Keterangan Tidak Memiliki",
-    "Penerbitan Surat Keterangan Usaha"
-  ],
-
-  "Pajak Bumi dan Bangunan": [
-    "Pembayaran Pajak Bumi dan Bangunan",
-    "Pemutakhiran Pajak Bumi dan Bangunan",
-    "Pendaftaran Pajak Bumi dan Bangunan",
-    "Penghapusan Pajak Bumi dan Bangunan"
-  ],
-
-  "Pertanahan": [
-    "Pendaftaran Surat Pernyataan Penguasaan Fisik Bidang Tanah",
-    "Penerbitan Surat Keterangan Ganti Nama Desa",
-    "Penerbitan Surat Keterangan Hibah",
-    "Penerbitan Surat Keterangan Kepemilikan Tanah",
-    "Penerbitan Surat Keterangan Tanah Tidak Sengketa"
-  ]
+const SERVICE_INFO={
+"Administrasi Kependudukan":[
+"Batal Pindah Kabupaten Kota",
+"Cetak Ulang Kartu Keluarga karena Hilang, Rusak, atau Versi Kode Batang (Barcode)",
+"Gabung Kartu Keluarga karena Perkawinan","Pecah Kartu Keluarga",
+"Pembaharuan Kartu Identitas Anak bagi Anak Berusia 5 Tahun ke Atas",
+"Penduduk Nonpermanen bagi Penduduk Luar Kabupaten Penajam Paser Utara Berdomisili Sementara",
+"Penerbitan Akta Kelahiran, Kartu Identitas Anak, dan Kartu Keluarga",
+"Penerbitan Akta Kematian dan Kartu Keluarga bagi Keluarga yang Ditinggalkan",
+"Penerbitan Kartu Keluarga bagi Penduduk Pindah Datang Antarkabupaten Kota",
+"Penerbitan Surat Keterangan Domisili bagi Penduduk Kabupaten Penajam Paser Utara Berdomisili Sementara",
+"Perubahan Elemen Data Kependudukan",
+"Pindah RT, Pindah Desa/Kelurahan, Pindah Kecamatan, dan Pindah Kabupaten/Kota",
+"Pisah Kartu Keluarga karena Perceraian"],
+"Administrasi Pernikahan":["Penerbitan Pengantar Surat Nikah","Penerbitan Surat Keterangan Status Perkawinan"],
+"Administrasi Umum":[
+"Legalisasi Dokumen","Penerbitan Pengantar Surat Izin Keramaian",
+"Penerbitan Pengantar Surat Keterangan Catatan Kepolisian","Penerbitan Surat Keterangan Beda Nama",
+"Penerbitan Surat Keterangan Domisili Organisasi Instansi Perusahaan","Penerbitan Surat Keterangan Gaib",
+"Penerbitan Surat Keterangan Pekerjaan",
+"Penerbitan Surat Pernyataan Ahli Waris, Surat Keterangan Ahli Waris, dan Surat Kuasa Ahli Waris"],
+"Kesejahteraan":["Penerbitan Surat Keterangan Penghasilan","Penerbitan Surat Keterangan Tidak Mampu","Penerbitan Surat Keterangan Tidak Memiliki","Penerbitan Surat Keterangan Usaha"],
+"Pajak Bumi dan Bangunan":["Pembayaran Pajak Bumi dan Bangunan","Pemutakhiran Pajak Bumi dan Bangunan","Pendaftaran Pajak Bumi dan Bangunan","Penghapusan Pajak Bumi dan Bangunan"],
+"Pertanahan":["Pendaftaran Surat Pernyataan Penguasaan Fisik Bidang Tanah","Penerbitan Surat Keterangan Ganti Nama Desa","Penerbitan Surat Keterangan Hibah","Penerbitan Surat Keterangan Kepemilikan Tanah","Penerbitan Surat Keterangan Tanah Tidak Sengketa"]
 };
 
-let pelayanan = [];
+let pelayanan=[];
+const serviceSelect=document.getElementById("serviceSelect");
+const customerName=document.getElementById("customerName");
+const takeQueueBtn=document.getElementById("takeQueueBtn");
+const statusBox=document.getElementById("statusBox");
+const ticket=document.getElementById("ticket");
+const categoryGrid=document.getElementById("categoryGrid");
+const serviceTitle=document.getElementById("serviceTitle");
+const serviceList=document.getElementById("serviceList");
+const counterBadge=document.getElementById("counterBadge");
 
-const serviceSelect = document.getElementById("serviceSelect");
-const customerName = document.getElementById("customerName");
-const takeQueueBtn = document.getElementById("takeQueueBtn");
-const statusBox = document.getElementById("statusBox");
-const ticket = document.getElementById("ticket");
-const categoryGrid = document.getElementById("categoryGrid");
-const serviceTitle = document.getElementById("serviceTitle");
-const serviceList = document.getElementById("serviceList");
-const counterBadge = document.getElementById("counterBadge");
+function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+function status(msg,type){statusBox.textContent=msg;statusBox.className="status show "+type}
 
-function showStatus(message, type){
-  statusBox.textContent = message;
-  statusBox.className = "status show " + type;
-}
-
-function clearStatus(){
-  statusBox.textContent = "";
-  statusBox.className = "status";
+function renderInfo(item){
+ if(!item){serviceTitle.textContent="Pilih kategori pelayanan";counterBadge.textContent="-";serviceList.innerHTML='<div class="empty">Pilih salah satu kategori di atas untuk melihat daftar layanan.</div>';return}
+ serviceTitle.textContent=item.name;counterBadge.textContent="Loket "+(item.counters?.code||"-");
+ const list=SERVICE_INFO[item.name]||[];
+ serviceList.innerHTML=list.length?list.map(x=>'<div class="service-item"><span class="dot"></span><span>'+esc(x)+'</span></div>').join(""):'<div class="empty">Informasi layanan belum tersedia.</div>';
 }
 
 function renderCategories(){
-  categoryGrid.innerHTML = "";
-
-  pelayanan.forEach(item => {
-    const div = document.createElement("div");
-    div.className = "category";
-    div.dataset.id = item.id;
-
-    const serviceCount = SERVICE_INFO[item.name]
-      ? SERVICE_INFO[item.name].length
-      : 0;
-
-    div.innerHTML = `
-      <strong>${escapeHtml(item.name)}</strong>
-      <span>${serviceCount} jenis layanan</span>
-    `;
-
-    div.addEventListener("click", () => {
-      serviceSelect.value = String(item.id);
-      renderServiceInfo(item);
-      document.querySelectorAll(".category").forEach(x => x.classList.remove("active"));
-      div.classList.add("active");
-    });
-
-    categoryGrid.appendChild(div);
-  });
-}
-
-function renderServiceInfo(item){
-  if(!item){
-    serviceTitle.textContent = "Pilih kategori pelayanan";
-    counterBadge.textContent = "-";
-    serviceList.innerHTML = `
-      <div class="empty">
-        Pilih salah satu kategori di atas untuk melihat daftar layanan.
-      </div>
-    `;
-    return;
-  }
-
-  serviceTitle.textContent = item.name;
-  counterBadge.textContent = "Loket " + (item.counters?.code || "-");
-
-  const list = SERVICE_INFO[item.name] || [];
-
-  if(!list.length){
-    serviceList.innerHTML = `
-      <div class="empty">Informasi layanan belum tersedia.</div>
-    `;
-    return;
-  }
-
-  serviceList.innerHTML = list.map(service => `
-    <div class="service-item">
-      <span class="dot"></span>
-      <span>${escapeHtml(service)}</span>
-    </div>
-  `).join("");
-}
-
-function escapeHtml(value){
-  return String(value ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+ categoryGrid.innerHTML="";
+ pelayanan.forEach(item=>{
+  const d=document.createElement("div");d.className="category";d.dataset.id=item.id;
+  d.innerHTML="<strong>"+esc(item.name)+"</strong><span>"+((SERVICE_INFO[item.name]||[]).length)+" jenis layanan</span>";
+  d.onclick=()=>{serviceSelect.value=String(item.id);document.querySelectorAll(".category").forEach(x=>x.classList.remove("active"));d.classList.add("active");renderInfo(item)};
+  categoryGrid.appendChild(d);
+ });
 }
 
 async function loadPelayanan(){
-  serviceSelect.innerHTML = `<option value="">Memuat pelayanan...</option>`;
-
-  const { data, error } = await db
-    .from("services")
-    .select(`
-      id,
-      name,
-      prefix,
-      counter_id,
-      counters (
-        code,
-        name
-      )
-    `)
-    .eq("is_active", true)
-    .order("id");
-
-  if(error){
-    console.error(error);
-    serviceSelect.innerHTML = `<option value="">Gagal memuat pelayanan</option>`;
-    showStatus("Pelayanan tidak dapat dimuat. Silakan muat ulang halaman.", "error");
-    return;
-  }
-
-  pelayanan = data || [];
-
-  serviceSelect.innerHTML =
-    `<option value="">-- Pilih kategori pelayanan --</option>` +
-    pelayanan.map(item => `
-      <option value="${item.id}">
-        ${escapeHtml(item.name)} — Loket ${escapeHtml(item.counters?.code || "-")}
-      </option>
-    `).join("");
-
-  renderCategories();
-
-  if(pelayanan.length > 0){
-    renderServiceInfo(pelayanan[0]);
-    serviceSelect.value = String(pelayanan[0].id);
-
-    const firstCategory = document.querySelector(".category");
-    if(firstCategory) firstCategory.classList.add("active");
-  }
+ const {data,error}=await db.from("services").select("id,name,prefix,counter_id,counters(code,name)").eq("is_active",true).order("id");
+ if(error){serviceSelect.innerHTML='<option value="">Gagal memuat pelayanan</option>';status("Pelayanan tidak dapat dimuat. Silakan muat ulang halaman.","error");return}
+ pelayanan=data||[];
+ serviceSelect.innerHTML='<option value="">-- Pilih kategori pelayanan --</option>'+pelayanan.map(x=>'<option value="'+x.id+'">'+esc(x.name)+" — Loket "+esc(x.counters?.code||"-")+"</option>").join("");
+ renderCategories();
+ if(pelayanan.length){serviceSelect.value=String(pelayanan[0].id);renderInfo(pelayanan[0]);document.querySelector(".category")?.classList.add("active")}
 }
 
-serviceSelect.addEventListener("change", function(){
-  const selected = pelayanan.find(x => String(x.id) === String(this.value));
-
-  document.querySelectorAll(".category").forEach(x => {
-    x.classList.toggle("active", x.dataset.id === String(this.value));
-  });
-
-  renderServiceInfo(selected);
-});
+serviceSelect.onchange=function(){
+ const item=pelayanan.find(x=>String(x.id)===String(this.value));
+ document.querySelectorAll(".category").forEach(x=>x.classList.toggle("active",x.dataset.id===String(this.value)));
+ renderInfo(item);
+};
 
 async function ambilNomor(){
-  clearStatus();
-  ticket.classList.remove("show");
-
-  const nama = customerName.value.trim();
-  const serviceId = serviceSelect.value;
-
-  if(!nama){
-    showStatus("Nama pemohon wajib diisi.", "error");
-    customerName.focus();
-    return;
-  }
-
-  if(!serviceId){
-    showStatus("Silakan pilih kategori pelayanan terlebih dahulu.", "error");
-    serviceSelect.focus();
-    return;
-  }
-
-  takeQueueBtn.disabled = true;
-  takeQueueBtn.textContent = "MEMPROSES...";
-
-  try{
-    const { data, error } = await db.rpc("ambil_nomor_antrean", {
-      p_service_id: Number(serviceId),
-      p_customer_name: nama
-    });
-
-    if(error){
-      console.error(error);
-      throw new Error(error.message || "Gagal mengambil nomor antrean.");
-    }
-
-    const result = Array.isArray(data) ? data[0] : data;
-
-    if(!result || !result.queue_code){
-      throw new Error("Nomor antrean tidak berhasil dibuat.");
-    }
-
-    document.getElementById("ticketNumber").textContent = result.queue_code;
-    document.getElementById("ticketName").textContent = result.customer_name;
-    document.getElementById("ticketService").textContent =
-      result.service_name || "Pelayanan";
-    document.getElementById("ticketCounter").textContent =
-      "Loket " + (result.counter_code || "-");
-
-    ticket.classList.add("show");
-
-    showStatus(
-      "Nomor antrean berhasil diambil. Silakan menunggu panggilan pada layar antrean.",
-      "success"
-    );
-
-  }catch(err){
-    showStatus(
-      err.message || "Terjadi kesalahan. Silakan coba lagi.",
-      "error"
-    );
-  }finally{
-    takeQueueBtn.disabled = false;
-    takeQueueBtn.textContent = "AMBIL NOMOR ANTREAN";
-  }
+ statusBox.className="status";ticket.classList.remove("show");
+ const nama=customerName.value.trim(), serviceId=serviceSelect.value;
+ if(!nama){status("Nama pemohon wajib diisi.","error");customerName.focus();return}
+ if(!serviceId){status("Silakan pilih kategori pelayanan terlebih dahulu.","error");serviceSelect.focus();return}
+ takeQueueBtn.disabled=true;takeQueueBtn.textContent="MEMPROSES...";
+ try{
+  const {data,error}=await db.rpc("ambil_nomor_antrean",{p_service_id:Number(serviceId),p_customer_name:nama});
+  if(error)throw new Error(error.message||"Gagal mengambil nomor antrean.");
+  const r=Array.isArray(data)?data[0]:data;
+  if(!r||!r.queue_code)throw new Error("Nomor antrean tidak berhasil dibuat.");
+  document.getElementById("ticketNumber").textContent=r.queue_code;
+  document.getElementById("ticketName").textContent=r.customer_name;
+  document.getElementById("ticketService").textContent=r.service_name||"Pelayanan";
+  document.getElementById("ticketCounter").textContent="Loket "+(r.counter_code||"-");
+  ticket.classList.add("show");
+  status("Nomor antrean berhasil diambil. Silakan menunggu panggilan pada layar antrean.","success");
+ }catch(e){console.error(e);status(e.message||"Terjadi kesalahan. Silakan coba lagi.","error")}
+ finally{takeQueueBtn.disabled=false;takeQueueBtn.textContent="AMBIL NOMOR ANTREAN"}
 }
-
-customerName.addEventListener("keydown", function(e){
-  if(e.key === "Enter"){
-    ambilNomor();
-  }
-});
-
+customerName.onkeydown=e=>{if(e.key==="Enter")ambilNomor()};
 loadPelayanan();
 </script>
-
 </body>
 </html>
