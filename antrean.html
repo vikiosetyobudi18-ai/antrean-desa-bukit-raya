@@ -1,6 +1,4 @@
-from pathlib import Path
-
-html = r'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
@@ -706,10 +704,3 @@ loadPelayanan();
 
 </body>
 </html>
-'''
-
-path = Path("/mnt/data/antrean.html")
-path.write_text(html, encoding="utf-8")
-
-print(f"File berhasil dibuat: {path}")
-print(f"Ukuran: {path.stat().st_size:,} byte")
