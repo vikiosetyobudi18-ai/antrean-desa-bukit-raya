@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Panel Antrean Desa Bukit Raya</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f8fc;
+    color: #222;
+}
+
+.app {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 30px 20px 50px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.header h1 {
+    margin: 0;
+    color: #1769aa;
+    font-size: 34px;
+}
+
+.header p {
+    color: #777;
+    margin-top: 8px;
+}
+
+.loket-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.loket {
+    padding: 16px;
+    border: 2px solid #1769aa;
+    border-radius: 10px;
+    background: white;
+    color: #1769aa;
+    text-align: center;
+    font-weight: bold;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.loket.active {
+    background: #1769aa;
+    color: white;
+}
+
+.petugas {
+    background: white;
+    border-radius: 16px;
+    padding: 22px;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0,0,0,.07);
+    margin-bottom: 20px;
+}
+
+.petugas small {
+    color: #888;
+}
+
+.petugas h2 {
+    margin: 6px 0;
+    color: #1769aa;
+}
+
+.antrean-card {
+    background: white;
+    border-radius: 18px;
+    padding: 40px 25px;
+    text-align: center;
+    box-shadow: 0 5px 25px rgba(0,0,0,.08);
+}
+
+.antrean-kosong {
+    padding: 40px;
+    color: #777;
+    font-size: 20px;
+}
+
+.nomor {
+    color: #1769aa;
+    font-size: 92px;
+    font-weight: 800;
+    line-height: 1;
+    margin: 12px 0;
+}
+
+.nama {
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.layanan {
+    color: #666;
+    margin-top: 8px;
+    font-size: 18px;
+}
+
+.status {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 9px 20px;
+    border-radius: 30px;
+    background: #eaf5ff;
+    color: #1769aa;
+    font-weight: bold;
+}
+
+.pesan {
+    margin: 18px 0;
+    min-height: 24px;
+    font-weight: bold;
+}
+
+.error {
+    color: #c62828;
+}
+
+.success {
+    color: #16853a;
+}
+
+.tombol-container {
+    margin-top: 25px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.tombol {
+    padding: 18px;
+    border-radius: 10px;
+    border: none;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.tombol:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.panggil {
+    grid-column: span 2;
+    background: #1769aa;
+    font-size: 19px;
+}
+
+.ulang {
+    background: #f0ad4e;
+}
+
+.mulai {
+    background: #28a745;
+}
+
+.selesai {
+    background: #20a0a0;
+}
+
+.lewati {
+    background: #dc3545;
+}
+
+@media (max-width: 700px) {
+
+    .loket-container {
+        grid-template-columns: repeat(2,1fr);
+    }
+
+    .nomor {
+        font-size: 65px;
+    }
+
+    .nama {
+        font-size: 23px;
+    }
+
+    .tombol-container {
+        grid-template-columns: 1fr;
+    }
+
+    .panggil {
+        grid-column: span 1;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="app">
+
+    <div class="header">
+
+        <h1>
+            Panel Antrean Pelayanan
+        </h1>
+
+        <p>
+            Desa Bukit Raya
+        </p>
+
+    </div>
+
+
+    <div class="loket-container">
+
+        <div
+            class="loket"
+            data-counter="A">
+            LOKET A
+        </div>
+
+        <div
+            class="loket active"
+            data-counter="B">
+            LOKET B
+        </div>
+
+        <div
+            class="loket"
+            data-counter="C">
+            LOKET C
+        </div>
+
+        <div
+            class="loket"
+            data-counter="D">
+            LOKET D
+        </div>
+
+    </div>
+
+
+    <div class="petugas">
+
+        <small>PETUGAS</small>
+
+        <h2 id="namaLoket">
+            LOKET B
+        </h2>
+
+        <div id="namaPetugas">
+            Vikio
+        </div>
+
+    </div>
+
+
+    <div class="antrean-card">
+
+        <div id="antreanContent">
+
+            <div class="antrean-kosong">
+
+                Belum ada antrean yang dipanggil.
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="pesan"
+            class="pesan">
+        </div>
+
+
+        <div class="tombol-container">
+
+            <button
+                id="btnPanggil"
+                class="tombol panggil">
+
+                📢 PANGGIL ANTREAN BERIKUTNYA
+
+            </button>
+
+
+            <button
+                id="btnUlang"
+                class="tombol ulang"
+                disabled>
+
+                🔊 PANGGIL ULANG
+
+            </button>
+
+
+            <button
+                id="btnMulai"
+                class="tombol mulai"
+                disabled>
+
+                ▶ MULAI MELAYANI
+
+            </button>
+
+
+            <button
+                id="btnSelesai"
+                class="tombol selesai"
+                disabled>
+
+                ✓ SELESAI
+
+            </button>
+
+
+            <button
+                id="btnLewati"
+                class="tombol lewati"
+                disabled>
+
+                ⏭ LEWATI
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const SUPABASE_URL =
+    "https://pyawggjlbrvneflpsalj.supabase.co";
+
+const SUPABASE_KEY =
+    "sb_publishable_5SdvMobBB2AvtXcJd_Scxw_rVsoqM8R";
+
+
+const db =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+
+const loketData = {
+
+    A: {
+        nama: "LOKET A",
+        petugas: "Arman"
+    },
+
+    B: {
+        nama: "LOKET B",
+        petugas: "Vikio"
+    },
+
+    C: {
+        nama: "LOKET C",
+        petugas: "Dilla"
+    },
+
+    D: {
+        nama: "LOKET D",
+        petugas: "Ayu"
+    }
+
+};
+
+
+let loketAktif = "B";
+
+let antreanAktif = null;
+
+
+const antreanContent =
+    document.getElementById(
+        "antreanContent"
+    );
+
+const pesan =
+    document.getElementById(
+        "pesan"
+    );
+
+const namaLoket =
+    document.getElementById(
+        "namaLoket"
+    );
+
+const namaPetugas =
+    document.getElementById(
+        "namaPetugas"
+    );
+
+const btnPanggil =
+    document.getElementById(
+        "btnPanggil"
+    );
+
+const btnUlang =
+    document.getElementById(
+        "btnUlang"
+    );
+
+const btnMulai =
+    document.getElementById(
+        "btnMulai"
+    );
+
+const btnSelesai =
+    document.getElementById(
+        "btnSelesai"
+    );
+
+const btnLewati =
+    document.getElementById(
+        "btnLewati"
+    );
+
+
+function tampilPesan(
+    text,
+    type
+) {
+
+    pesan.textContent =
+        text;
+
+    pesan.className =
+        "pesan " +
+        (type || "");
+
+}
+
+
+function renderAntrean(
+    data
+) {
+
+    antreanAktif =
+        data || null;
+
+
+    if (!data) {
+
+        antreanContent.innerHTML = `
+            <div class="antrean-kosong">
+                Belum ada antrean yang dipanggil.
+            </div>
+        `;
+
+        btnUlang.disabled = true;
+        btnMulai.disabled = true;
+        btnSelesai.disabled = true;
+        btnLewati.disabled = true;
+
+        return;
+
+    }
+
+
+    const status =
+        data.status === "serving"
+            ? "SEDANG DILAYANI"
+            : "DIPANGGIL";
+
+
+    antreanContent.innerHTML = `
+
+        <div>
+            ANTREAN SAAT INI
+        </div>
+
+        <div class="nomor">
+            ${data.queue_code}
+        </div>
+
+        <div class="nama">
+            ${data.customer_name}
+        </div>
+
+        <div class="layanan">
+            ${data.service_name}
+        </div>
+
+        <div class="status">
+            ${status}
+        </div>
+
+    `;
+
+
+    btnUlang.disabled =
+        false;
+
+
+    btnMulai.disabled =
+        data.status !== "called";
+
+
+    btnSelesai.disabled =
+        data.status !== "called" &&
+        data.status !== "serving";
+
+
+    btnLewati.disabled =
+        data.status !== "called" &&
+        data.status !== "serving";
+
+}
+
+
+function suaraAntrean(
+    data
+) {
+
+    if (
+        !window.speechSynthesis
+    ) {
+        return;
+    }
+
+
+    window.speechSynthesis.cancel();
+
+
+    const text =
+        "Nomor antrean " +
+        data.queue_code +
+        ", atas nama " +
+        data.customer_name +
+        ", silakan menuju " +
+        data.counter_name;
+
+
+    const utterance =
+        new SpeechSynthesisUtterance(
+            text
+        );
+
+
+    utterance.lang =
+        "id-ID";
+
+    utterance.rate =
+        0.85;
+
+
+    window.speechSynthesis.speak(
+        utterance
+    );
+
+}
+
+
+async function panggilAntrean() {
+
+    btnPanggil.disabled =
+        true;
+
+
+    tampilPesan(
+        "Memanggil antrean berikutnya..."
+    );
+
+
+    try {
+
+        const result =
+            await db.rpc(
+                "panggil_antrean",
+                {
+                    p_counter_code:
+                        loketAktif
+                }
+            );
+
+
+        if (
+            result.error
+        ) {
+
+            throw result.error;
+
+        }
+
+
+        if (
+            !result.data ||
+            !result.data.length
+        ) {
+
+            throw new Error(
+                "Tidak ada antrean yang menunggu."
+            );
+
+        }
+
+
+        renderAntrean(
+            result.data[0]
+        );
+
+
+        tampilPesan(
+            "Antrean berhasil dipanggil.",
+            "success"
+        );
+
+
+        suaraAntrean(
+            result.data[0]
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        tampilPesan(
+            error.message,
+            "error"
+        );
+
+    }
+
+    finally {
+
+        btnPanggil.disabled =
+            false;
+
+    }
+
+}
+
+
+async function panggilUlang() {
+
+    if (
+        !antreanAktif
+    ) {
+        return;
+    }
+
+
+    const result =
+        await db.rpc(
+            "panggil_ulang_antrean",
+            {
+                p_queue_id:
+                    antreanAktif.queue_id
+            }
+        );
+
+
+    if (
+        result.error
+    ) {
+
+        tampilPesan(
+            result.error.message,
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if (
+        result.data &&
+        result.data.length
+    ) {
+
+        renderAntrean(
+            result.data[0]
+        );
+
+
+        suaraAntrean(
+            result.data[0]
+        );
+
+    }
+
+}
+
+
+async function mulaiMelayani() {
+
+    if (
+        !antreanAktif
+    ) {
+        return;
+    }
+
+
+    const result =
+        await db.rpc(
+            "mulai_layani_antrean",
+            {
+                p_queue_id:
+                    antreanAktif.queue_id
+            }
+        );
+
+
+    if (
+        result.error
+    ) {
+
+        tampilPesan(
+            result.error.message,
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    antreanAktif.status =
+        "serving";
+
+
+    renderAntrean(
+        antreanAktif
+    );
+
+
+    tampilPesan(
+        "Antrean sedang dilayani.",
+        "success"
+    );
+
+}
+
+
+async function selesai() {
+
+    if (
+        !antreanAktif
+    ) {
+        return;
+    }
+
+
+    const result =
+        await db.rpc(
+            "selesaikan_antrean",
+            {
+                p_queue_id:
+                    antreanAktif.queue_id
+            }
+        );
+
+
+    if (
+        result.error
+    ) {
+
+        tampilPesan(
+            result.error.message,
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    renderAntrean(
+        null
+    );
+
+
+    tampilPesan(
+        "Pelayanan selesai.",
+        "success"
+    );
+
+}
+
+
+async function lewati() {
+
+    if (
+        !antreanAktif
+    ) {
+        return;
+    }
+
+
+    const result =
+        await db.rpc(
+            "lewati_antrean",
+            {
+                p_queue_id:
+                    antreanAktif.queue_id
+            }
+        );
+
+
+    if (
+        result.error
+    ) {
+
+        tampilPesan(
+            result.error.message,
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    renderAntrean(
+        null
+    );
+
+
+    tampilPesan(
+        "Antrean dilewati.",
+        "success"
+    );
+
+}
+
+
+document
+    .querySelectorAll(
+        ".loket"
+    )
+    .forEach(
+        function (element) {
+
+            element.addEventListener(
+                "click",
+                function () {
+
+                    loketAktif =
+                        this.dataset.counter;
+
+
+                    document
+                        .querySelectorAll(
+                            ".loket"
+                        )
+                        .forEach(
+                            function (item) {
+
+                                item.classList
+                                    .remove(
+                                        "active"
+                                    );
+
+                            }
+                        );
+
+
+                    this.classList.add(
+                        "active"
+                    );
+
+
+                    namaLoket.textContent =
+                        loketData[
+                            loketAktif
+                        ].nama;
+
+
+                    namaPetugas.textContent =
+                        loketData[
+                            loketAktif
+                        ].petugas;
+
+
+                    renderAntrean(
+                        null
+                    );
+
+
+                    tampilPesan(
+                        "Siap memanggil antrean."
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+btnPanggil.addEventListener(
+    "click",
+    panggilAntrean
+);
+
+
+btnUlang.addEventListener(
+    "click",
+    panggilUlang
+);
+
+
+btnMulai.addEventListener(
+    "click",
+    mulaiMelayani
+);
+
+
+btnSelesai.addEventListener(
+    "click",
+    selesai
+);
+
+
+btnLewati.addEventListener(
+    "click",
+    lewati
+);
+
+</script>
+
+</body>
+</html>
