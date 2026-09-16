@@ -1,12 +1,22 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Panel Antrean Desa Bukit Raya</title>
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+    Panel Antrean Desa Bukit Raya
+</title>
+
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 
 <style>
 
@@ -23,7 +33,7 @@ body {
 
 .app {
     max-width: 1100px;
-    margin: 0 auto;
+    margin: auto;
     padding: 30px 20px 50px;
 }
 
@@ -40,25 +50,44 @@ body {
 
 .header p {
     color: #777;
-    margin-top: 8px;
+    margin: 8px 0 0;
 }
+
+
+/* =========================================
+   LOKET
+========================================= */
 
 .loket-container {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns:
+        repeat(4, 1fr);
+
     gap: 12px;
-    margin-bottom: 20px;
+
+    margin-bottom: 18px;
 }
 
 .loket {
+    position: relative;
+
     padding: 16px;
-    border: 2px solid #1769aa;
+
+    border:
+        2px solid #1769aa;
+
     border-radius: 10px;
+
     background: white;
+
     color: #1769aa;
+
     text-align: center;
+
     font-weight: bold;
+
     cursor: pointer;
+
     transition: .2s;
 }
 
@@ -67,13 +96,192 @@ body {
     color: white;
 }
 
-.petugas {
-    background: white;
-    border-radius: 16px;
-    padding: 22px;
-    text-align: center;
-    box-shadow: 0 5px 20px rgba(0,0,0,.07);
+.loket.waiting {
+    border-color: #dc3545;
+    box-shadow:
+        0 0 0 3px
+        rgba(220,53,69,.12);
+}
+
+.loket-badge {
+    position: absolute;
+
+    top: -9px;
+    right: -9px;
+
+    min-width: 26px;
+    height: 26px;
+
+    padding: 5px 7px;
+
+    border-radius: 50%;
+
+    background: #dc3545;
+
+    color: white;
+
+    font-size: 12px;
+
+    line-height: 16px;
+
+    display: none;
+}
+
+.loket-badge.show {
+    display: block;
+}
+
+
+/* =========================================
+   STATUS RINGKAS
+========================================= */
+
+.status-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 12px;
+
     margin-bottom: 20px;
+}
+
+.status-item {
+
+    background: white;
+
+    border-radius: 12px;
+
+    padding: 15px;
+
+    text-align: center;
+
+    box-shadow:
+        0 4px 15px
+        rgba(0,0,0,.06);
+
+}
+
+.status-item-title {
+
+    font-weight: bold;
+
+    color: #1769aa;
+
+}
+
+.status-count {
+
+    font-size: 28px;
+
+    font-weight: bold;
+
+    margin-top: 6px;
+
+}
+
+.status-text {
+
+    color: #777;
+
+    font-size: 13px;
+
+}
+
+.status-item.has-waiting {
+
+    border:
+        2px solid #dc3545;
+
+}
+
+
+/* =========================================
+   NOTIFIKASI
+========================================= */
+
+.notification {
+
+    display: none;
+
+    position: relative;
+
+    background: #fff4d6;
+
+    border:
+        2px solid #f0ad4e;
+
+    color: #7a4d00;
+
+    border-radius: 14px;
+
+    padding: 18px 45px 18px 18px;
+
+    margin-bottom: 20px;
+
+    box-shadow:
+        0 5px 20px
+        rgba(240,173,78,.15);
+
+}
+
+.notification.show {
+    display: block;
+}
+
+.notification-title {
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    margin-bottom: 6px;
+
+}
+
+.notification-close {
+
+    position: absolute;
+
+    right: 14px;
+
+    top: 10px;
+
+    border: none;
+
+    background: none;
+
+    font-size: 22px;
+
+    color: #7a4d00;
+
+    cursor: pointer;
+
+}
+
+
+/* =========================================
+   PETUGAS
+========================================= */
+
+.petugas {
+
+    background: white;
+
+    border-radius: 16px;
+
+    padding: 22px;
+
+    text-align: center;
+
+    box-shadow:
+        0 5px 20px
+        rgba(0,0,0,.07);
+
+    margin-bottom: 20px;
+
 }
 
 .petugas small {
@@ -81,57 +289,108 @@ body {
 }
 
 .petugas h2 {
-    margin: 6px 0;
+
+    margin:
+        6px 0;
+
     color: #1769aa;
+
 }
 
+
+/* =========================================
+   ANTREAN AKTIF
+========================================= */
+
 .antrean-card {
+
     background: white;
+
     border-radius: 18px;
+
     padding: 40px 25px;
+
     text-align: center;
-    box-shadow: 0 5px 25px rgba(0,0,0,.08);
+
+    box-shadow:
+        0 5px 25px
+        rgba(0,0,0,.08);
+
 }
 
 .antrean-kosong {
+
     padding: 40px;
+
     color: #777;
+
     font-size: 20px;
+
 }
 
 .nomor {
+
     color: #1769aa;
+
     font-size: 92px;
+
     font-weight: 800;
+
     line-height: 1;
+
     margin: 12px 0;
+
 }
 
 .nama {
+
     font-size: 30px;
+
     font-weight: bold;
+
 }
 
 .layanan {
+
     color: #666;
+
     margin-top: 8px;
+
     font-size: 18px;
+
 }
 
 .status {
+
     display: inline-block;
+
     margin-top: 16px;
+
     padding: 9px 20px;
+
     border-radius: 30px;
+
     background: #eaf5ff;
+
     color: #1769aa;
+
     font-weight: bold;
+
 }
 
+
+/* =========================================
+   PESAN
+========================================= */
+
 .pesan {
+
     margin: 18px 0;
+
     min-height: 24px;
+
     font-weight: bold;
+
 }
 
 .error {
@@ -142,32 +401,58 @@ body {
     color: #16853a;
 }
 
+
+/* =========================================
+   TOMBOL
+========================================= */
+
 .tombol-container {
+
     margin-top: 25px;
+
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
     gap: 12px;
+
 }
 
 .tombol {
+
     padding: 18px;
-    border-radius: 10px;
+
     border: none;
+
+    border-radius: 10px;
+
     color: white;
+
     font-size: 16px;
+
     font-weight: bold;
+
     cursor: pointer;
+
 }
 
 .tombol:disabled {
+
     opacity: .45;
+
     cursor: not-allowed;
+
 }
 
 .panggil {
+
     grid-column: span 2;
+
     background: #1769aa;
+
     font-size: 19px;
+
 }
 
 .ulang {
@@ -186,10 +471,21 @@ body {
     background: #dc3545;
 }
 
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
 @media (max-width: 700px) {
 
     .loket-container {
-        grid-template-columns: repeat(2,1fr);
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .status-grid {
+        grid-template-columns:
+            repeat(2, 1fr);
     }
 
     .nomor {
@@ -214,147 +510,358 @@ body {
 
 </head>
 
+
 <body>
+
 
 <div class="app">
 
-    <div class="header">
 
-        <h1>
-            Panel Antrean Pelayanan
-        </h1>
+<div class="header">
 
-        <p>
-            Desa Bukit Raya
-        </p>
+    <h1>
+        Panel Antrean Pelayanan
+    </h1>
+
+    <p>
+        Desa Bukit Raya
+    </p>
+
+</div>
+
+
+<!-- =====================================
+     NOTIFIKASI
+====================================== -->
+
+<div
+    id="notification"
+    class="notification"
+>
+
+    <button
+        id="notificationClose"
+        class="notification-close"
+    >
+        ×
+    </button>
+
+
+    <div
+        id="notificationTitle"
+        class="notification-title"
+    >
+        🔔 ANTREAN BARU
+    </div>
+
+
+    <div
+        id="notificationText"
+    >
+    </div>
+
+</div>
+
+
+<!-- =====================================
+     PILIH LOKET
+====================================== -->
+
+<div class="loket-container">
+
+
+<div
+    class="loket"
+    data-counter="A"
+>
+
+    LOKET A
+
+    <span
+        id="badgeA"
+        class="loket-badge"
+    >
+    </span>
+
+</div>
+
+
+<div
+    class="loket active"
+    data-counter="B"
+>
+
+    LOKET B
+
+    <span
+        id="badgeB"
+        class="loket-badge"
+    >
+    </span>
+
+</div>
+
+
+<div
+    class="loket"
+    data-counter="C"
+>
+
+    LOKET C
+
+    <span
+        id="badgeC"
+        class="loket-badge"
+    >
+    </span>
+
+</div>
+
+
+<div
+    class="loket"
+    data-counter="D"
+>
+
+    LOKET D
+
+    <span
+        id="badgeD"
+        class="loket-badge"
+    >
+    </span>
+
+</div>
+
+
+</div>
+
+
+<!-- =====================================
+     RINGKASAN ANTREAN
+====================================== -->
+
+<div
+    id="statusGrid"
+    class="status-grid"
+>
+
+
+<div
+    id="statusA"
+    class="status-item"
+>
+
+    <div class="status-item-title">
+        LOKET A
+    </div>
+
+    <div
+        id="countA"
+        class="status-count"
+    >
+        0
+    </div>
+
+    <div class="status-text">
+        menunggu
+    </div>
+
+</div>
+
+
+<div
+    id="statusB"
+    class="status-item"
+>
+
+    <div class="status-item-title">
+        LOKET B
+    </div>
+
+    <div
+        id="countB"
+        class="status-count"
+    >
+        0
+    </div>
+
+    <div class="status-text">
+        menunggu
+    </div>
+
+</div>
+
+
+<div
+    id="statusC"
+    class="status-item"
+>
+
+    <div class="status-item-title">
+        LOKET C
+    </div>
+
+    <div
+        id="countC"
+        class="status-count"
+    >
+        0
+    </div>
+
+    <div class="status-text">
+        menunggu
+    </div>
+
+</div>
+
+
+<div
+    id="statusD"
+    class="status-item"
+>
+
+    <div class="status-item-title">
+        LOKET D
+    </div>
+
+    <div
+        id="countD"
+        class="status-count"
+    >
+        0
+    </div>
+
+    <div class="status-text">
+        menunggu
+    </div>
+
+</div>
+
+
+</div>
+
+
+<!-- =====================================
+     PETUGAS
+====================================== -->
+
+<div class="petugas">
+
+    <small>
+        PETUGAS
+    </small>
+
+    <h2 id="namaLoket">
+        LOKET B
+    </h2>
+
+    <div id="namaPetugas">
+        Vikio
+    </div>
+
+</div>
+
+
+<!-- =====================================
+     ANTREAN AKTIF
+====================================== -->
+
+<div class="antrean-card">
+
+    <div id="antreanContent">
+
+        <div class="antrean-kosong">
+
+            Belum ada antrean yang dipanggil.
+
+        </div>
 
     </div>
 
 
-    <div class="loket-container">
-
-        <div
-            class="loket"
-            data-counter="A">
-            LOKET A
-        </div>
-
-        <div
-            class="loket active"
-            data-counter="B">
-            LOKET B
-        </div>
-
-        <div
-            class="loket"
-            data-counter="C">
-            LOKET C
-        </div>
-
-        <div
-            class="loket"
-            data-counter="D">
-            LOKET D
-        </div>
-
+    <div
+        id="pesan"
+        class="pesan"
+    >
     </div>
 
 
-    <div class="petugas">
-
-        <small>PETUGAS</small>
-
-        <h2 id="namaLoket">
-            LOKET B
-        </h2>
-
-        <div id="namaPetugas">
-            Vikio
-        </div>
-
-    </div>
+    <div class="tombol-container">
 
 
-    <div class="antrean-card">
+        <button
+            id="btnPanggil"
+            class="tombol panggil"
+        >
 
-        <div id="antreanContent">
+            📢 PANGGIL ANTREAN BERIKUTNYA
 
-            <div class="antrean-kosong">
-
-                Belum ada antrean yang dipanggil.
-
-            </div>
-
-        </div>
+        </button>
 
 
-        <div
-            id="pesan"
-            class="pesan">
-        </div>
+        <button
+            id="btnUlang"
+            class="tombol ulang"
+            disabled
+        >
+
+            🔊 PANGGIL ULANG
+
+        </button>
 
 
-        <div class="tombol-container">
+        <button
+            id="btnMulai"
+            class="tombol mulai"
+            disabled
+        >
 
-            <button
-                id="btnPanggil"
-                class="tombol panggil">
+            ▶ MULAI MELAYANI
 
-                📢 PANGGIL ANTREAN BERIKUTNYA
-
-            </button>
-
-
-            <button
-                id="btnUlang"
-                class="tombol ulang"
-                disabled>
-
-                🔊 PANGGIL ULANG
-
-            </button>
+        </button>
 
 
-            <button
-                id="btnMulai"
-                class="tombol mulai"
-                disabled>
+        <button
+            id="btnSelesai"
+            class="tombol selesai"
+            disabled
+        >
 
-                ▶ MULAI MELAYANI
+            ✓ SELESAI
 
-            </button>
-
-
-            <button
-                id="btnSelesai"
-                class="tombol selesai"
-                disabled>
-
-                ✓ SELESAI
-
-            </button>
+        </button>
 
 
-            <button
-                id="btnLewati"
-                class="tombol lewati"
-                disabled>
+        <button
+            id="btnLewati"
+            class="tombol lewati"
+            disabled
+        >
 
-                ⏭ LEWATI
+            ⏭ LEWATI
 
-            </button>
+        </button>
 
-        </div>
 
     </div>
 
 </div>
 
 
+</div>
+
+
 <script>
+
+
+/* =========================================
+   SUPABASE
+========================================= */
 
 const SUPABASE_URL =
     "https://pyawggjlbrvneflpsalj.supabase.co";
+
 
 const SUPABASE_KEY =
     "sb_publishable_5SdvMobBB2AvtXcJd_Scxw_rVsoqM8R";
@@ -366,6 +873,10 @@ const db =
         SUPABASE_KEY
     );
 
+
+/* =========================================
+   DATA LOKET
+========================================= */
 
 const loketData = {
 
@@ -392,50 +903,78 @@ const loketData = {
 };
 
 
-let loketAktif = "B";
+let loketAktif =
+    "B";
 
-let antreanAktif = null;
 
+let antreanAktif =
+    null;
+
+
+/*
+ * Menyimpan ID antrean waiting
+ * yang sudah diketahui panel.
+ */
+
+let waitingIds =
+    new Set();
+
+
+let pertamaKali =
+    true;
+
+
+/* =========================================
+   ELEMENT
+========================================= */
 
 const antreanContent =
     document.getElementById(
         "antreanContent"
     );
 
+
 const pesan =
     document.getElementById(
         "pesan"
     );
+
 
 const namaLoket =
     document.getElementById(
         "namaLoket"
     );
 
+
 const namaPetugas =
     document.getElementById(
         "namaPetugas"
     );
+
 
 const btnPanggil =
     document.getElementById(
         "btnPanggil"
     );
 
+
 const btnUlang =
     document.getElementById(
         "btnUlang"
     );
+
 
 const btnMulai =
     document.getElementById(
         "btnMulai"
     );
 
+
 const btnSelesai =
     document.getElementById(
         "btnSelesai"
     );
+
 
 const btnLewati =
     document.getElementById(
@@ -443,13 +982,75 @@ const btnLewati =
     );
 
 
+const notification =
+    document.getElementById(
+        "notification"
+    );
+
+
+const notificationText =
+    document.getElementById(
+        "notificationText"
+    );
+
+
+const notificationClose =
+    document.getElementById(
+        "notificationClose"
+    );
+
+
+/* =========================================
+   TANGGAL LOKAL BROWSER
+========================================= */
+
+function tanggalHariIni() {
+
+    const now =
+        new Date();
+
+    const year =
+        now.getFullYear();
+
+    const month =
+        String(
+            now.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+    const day =
+        String(
+            now.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+    return (
+        year +
+        "-" +
+        month +
+        "-" +
+        day
+    );
+
+}
+
+
+/* =========================================
+   PESAN
+========================================= */
+
 function tampilPesan(
     text,
     type
 ) {
 
     pesan.textContent =
-        text;
+        text || "";
+
 
     pesan.className =
         "pesan " +
@@ -457,6 +1058,637 @@ function tampilPesan(
 
 }
 
+
+/* =========================================
+   SUARA NOTIFIKASI
+========================================= */
+
+function bunyiNotifikasi() {
+
+    try {
+
+        const AudioContext =
+            window.AudioContext ||
+            window.webkitAudioContext;
+
+
+        if (!AudioContext) {
+            return;
+        }
+
+
+        const ctx =
+            new AudioContext();
+
+
+        const oscillator =
+            ctx.createOscillator();
+
+
+        const gain =
+            ctx.createGain();
+
+
+        oscillator.connect(
+            gain
+        );
+
+
+        gain.connect(
+            ctx.destination
+        );
+
+
+        oscillator.frequency.value =
+            880;
+
+
+        oscillator.type =
+            "sine";
+
+
+        gain.gain.setValueAtTime(
+            0.0001,
+            ctx.currentTime
+        );
+
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.18,
+            ctx.currentTime + 0.03
+        );
+
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.0001,
+            ctx.currentTime + 0.35
+        );
+
+
+        oscillator.start(
+            ctx.currentTime
+        );
+
+
+        oscillator.stop(
+            ctx.currentTime + 0.35
+        );
+
+    } catch (e) {
+
+        console.log(
+            "Bunyi notifikasi tidak tersedia."
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   NOTIFIKASI
+========================================= */
+
+function tampilNotifikasi(
+    loket,
+    jumlah,
+    contohNama
+) {
+
+    notificationText.innerHTML =
+        "<strong>" +
+        loketData[loket].nama +
+        "</strong> memiliki " +
+        "<strong>" +
+        jumlah +
+        " antrean</strong> yang sedang menunggu." +
+        (
+            contohNama
+                ? "<br>Contoh: " +
+                  contohNama
+                : ""
+        );
+
+
+    notification.classList.add(
+        "show"
+    );
+
+
+    document.title =
+        "🔔 Antrean Baru • Panel Antrean";
+
+
+    bunyiNotifikasi();
+
+}
+
+
+notificationClose.addEventListener(
+    "click",
+    function () {
+
+        notification.classList.remove(
+            "show"
+        );
+
+
+        document.title =
+            "Panel Antrean Desa Bukit Raya";
+
+    }
+);
+
+
+/* =========================================
+   RINGKASAN JUMLAH ANTREAN
+========================================= */
+
+function updateWaitingSummary(
+    data
+) {
+
+    const counts = {
+
+        A: 0,
+        B: 0,
+        C: 0,
+        D: 0
+
+    };
+
+
+    const firstNames = {
+
+        A: "",
+        B: "",
+        C: "",
+        D: ""
+
+    };
+
+
+    data.forEach(
+        function (row) {
+
+            const code =
+                row.counter_code;
+
+
+            if (
+                counts[code] !== undefined
+            ) {
+
+                counts[code]++;
+
+
+                if (
+                    !firstNames[code]
+                ) {
+
+                    firstNames[code] =
+                        row.customer_name;
+
+                }
+
+            }
+
+        }
+    );
+
+
+    ["A","B","C","D"]
+        .forEach(
+            function (code) {
+
+                document.getElementById(
+                    "count" + code
+                ).textContent =
+                    counts[code];
+
+
+                const status =
+                    document.getElementById(
+                        "status" + code
+                    );
+
+
+                const badge =
+                    document.getElementById(
+                        "badge" + code
+                    );
+
+
+                const loket =
+                    document.querySelector(
+                        '[data-counter="' +
+                        code +
+                        '"]'
+                    );
+
+
+                if (
+                    counts[code] > 0
+                ) {
+
+                    status.classList.add(
+                        "has-waiting"
+                    );
+
+
+                    badge.textContent =
+                        counts[code];
+
+
+                    badge.classList.add(
+                        "show"
+                    );
+
+
+                    loket.classList.add(
+                        "waiting"
+                    );
+
+                } else {
+
+                    status.classList.remove(
+                        "has-waiting"
+                    );
+
+
+                    badge.textContent =
+                        "";
+
+
+                    badge.classList.remove(
+                        "show"
+                    );
+
+
+                    loket.classList.remove(
+                        "waiting"
+                    );
+
+                }
+
+            }
+        );
+
+
+    return {
+
+        counts:
+            counts,
+
+        names:
+            firstNames
+
+    };
+
+}
+
+
+/* =========================================
+   CEK ANTREAN WAITING
+========================================= */
+
+async function cekAntreanMenunggu() {
+
+    try {
+
+        const result =
+            await db
+                .from("queues")
+                .select(
+                    `
+                    id,
+                    queue_code,
+                    customer_name,
+                    counter_id,
+                    status,
+                    queue_date,
+                    counters (
+                        code
+                    )
+                    `
+                )
+                .eq(
+                    "queue_date",
+                    tanggalHariIni()
+                )
+                .eq(
+                    "status",
+                    "waiting"
+                )
+                .order(
+                    "id",
+                    {
+                        ascending: true
+                    }
+                );
+
+
+        if (
+            result.error
+        ) {
+
+            console.error(
+                "Gagal membaca waiting:",
+                result.error
+            );
+
+
+            return;
+
+        }
+
+
+        const rows =
+            (result.data || [])
+                .map(
+                    function (row) {
+
+                        return {
+
+                            id:
+                                row.id,
+
+                            queue_code:
+                                row.queue_code,
+
+                            customer_name:
+                                row.customer_name,
+
+                            counter_code:
+                                row.counters?.code ||
+                                ""
+
+                        };
+
+                    }
+                );
+
+
+        const summary =
+            updateWaitingSummary(
+                rows
+            );
+
+
+        /*
+         * ID waiting saat ini.
+         */
+
+        const currentIds =
+            new Set(
+                rows.map(
+                    function (row) {
+                        return row.id;
+                    }
+                )
+            );
+
+
+        /*
+         * Pada pengecekan pertama,
+         * jangan bunyikan notifikasi
+         * untuk antrean lama.
+         */
+
+        if (!pertamaKali) {
+
+            let newRows =
+                rows.filter(
+                    function (row) {
+
+                        return !waitingIds.has(
+                            row.id
+                        );
+
+                    }
+                );
+
+
+            if (
+                newRows.length > 0
+            ) {
+
+                /*
+                 * Cari loket pertama
+                 * yang mendapatkan antrean baru.
+                 */
+
+                const row =
+                    newRows[0];
+
+
+                const loket =
+                    row.counter_code;
+
+
+                const jumlah =
+                    summary.counts[
+                        loket
+                    ];
+
+
+                tampilNotifikasi(
+                    loket,
+                    jumlah,
+                    row.customer_name
+                );
+
+            }
+
+        }
+
+
+        waitingIds =
+            currentIds;
+
+
+        pertamaKali =
+            false;
+
+
+    } catch (error) {
+
+        console.error(
+            "cekAntreanMenunggu:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   ANTREAN AKTIF LOKET TERPILIH
+========================================= */
+
+async function muatAntreanAktif() {
+
+    try {
+
+        const result =
+            await db
+                .from("queues")
+                .select(
+                    `
+                    id,
+                    queue_code,
+                    customer_name,
+                    service_id,
+                    counter_id,
+                    status,
+                    services (
+                        name
+                    ),
+                    counters (
+                        code,
+                        name
+                    )
+                    `
+                )
+                .eq(
+                    "queue_date",
+                    tanggalHariIni()
+                )
+                .eq(
+                    "counter_id",
+                    getCounterId(
+                        loketAktif
+                    )
+                )
+                .in(
+                    "status",
+                    [
+                        "called",
+                        "serving"
+                    ]
+                )
+                .order(
+                    "called_at",
+                    {
+                        ascending: false
+                    }
+                )
+                .limit(1)
+                .maybeSingle();
+
+
+        if (
+            result.error
+        ) {
+
+            console.error(
+                "Gagal membaca aktif:",
+                result.error
+            );
+
+
+            return;
+
+        }
+
+
+        if (
+            !result.data
+        ) {
+
+            renderAntrean(
+                null
+            );
+
+            return;
+
+        }
+
+
+        renderAntrean({
+
+            queue_id:
+                result.data.id,
+
+            queue_code:
+                result.data.queue_code,
+
+            customer_name:
+                result.data.customer_name,
+
+            service_name:
+                result.data.services?.name ||
+                "",
+
+            counter_name:
+                result.data.counters?.name ||
+                loketData[
+                    loketAktif
+                ].nama,
+
+            status:
+                result.data.status
+
+        });
+
+
+    } catch (error) {
+
+        console.error(
+            "muatAntreanAktif:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   ID COUNTER
+========================================= */
+
+function getCounterId(
+    code
+) {
+
+    if (
+        code === "A"
+    ) {
+        return 1;
+    }
+
+
+    if (
+        code === "B"
+    ) {
+        return 2;
+    }
+
+
+    if (
+        code === "C"
+    ) {
+        return 3;
+    }
+
+
+    if (
+        code === "D"
+    ) {
+        return 4;
+    }
+
+
+    return 1;
+
+}
+
+
+/* =========================================
+   RENDER ANTREAN AKTIF
+========================================= */
 
 function renderAntrean(
     data
@@ -474,10 +1706,22 @@ function renderAntrean(
             </div>
         `;
 
-        btnUlang.disabled = true;
-        btnMulai.disabled = true;
-        btnSelesai.disabled = true;
-        btnLewati.disabled = true;
+
+        btnUlang.disabled =
+            true;
+
+
+        btnMulai.disabled =
+            true;
+
+
+        btnSelesai.disabled =
+            true;
+
+
+        btnLewati.disabled =
+            true;
+
 
         return;
 
@@ -535,6 +1779,10 @@ function renderAntrean(
 }
 
 
+/* =========================================
+   SUARA
+========================================= */
+
 function suaraAntrean(
     data
 ) {
@@ -542,7 +1790,9 @@ function suaraAntrean(
     if (
         !window.speechSynthesis
     ) {
+
         return;
+
     }
 
 
@@ -567,8 +1817,9 @@ function suaraAntrean(
     utterance.lang =
         "id-ID";
 
+
     utterance.rate =
-        0.85;
+        .85;
 
 
     window.speechSynthesis.speak(
@@ -577,6 +1828,10 @@ function suaraAntrean(
 
 }
 
+
+/* =========================================
+   PANGGIL
+========================================= */
 
 async function panggilAntrean() {
 
@@ -637,9 +1892,15 @@ async function panggilAntrean() {
             result.data[0]
         );
 
-    }
 
-    catch (error) {
+        /*
+         * Perbarui indikator
+         * antrean menunggu.
+         */
+
+        await cekAntreanMenunggu();
+
+    } catch (error) {
 
         console.error(
             error
@@ -651,9 +1912,7 @@ async function panggilAntrean() {
             "error"
         );
 
-    }
-
-    finally {
+    } finally {
 
         btnPanggil.disabled =
             false;
@@ -663,12 +1922,18 @@ async function panggilAntrean() {
 }
 
 
+/* =========================================
+   PANGGIL ULANG
+========================================= */
+
 async function panggilUlang() {
 
     if (
         !antreanAktif
     ) {
+
         return;
+
     }
 
 
@@ -715,12 +1980,18 @@ async function panggilUlang() {
 }
 
 
+/* =========================================
+   MULAI
+========================================= */
+
 async function mulaiMelayani() {
 
     if (
         !antreanAktif
     ) {
+
         return;
+
     }
 
 
@@ -765,12 +2036,18 @@ async function mulaiMelayani() {
 }
 
 
+/* =========================================
+   SELESAI
+========================================= */
+
 async function selesai() {
 
     if (
         !antreanAktif
     ) {
+
         return;
+
     }
 
 
@@ -811,12 +2088,18 @@ async function selesai() {
 }
 
 
+/* =========================================
+   LEWATI
+========================================= */
+
 async function lewati() {
 
     if (
         !antreanAktif
     ) {
+
         return;
+
     }
 
 
@@ -857,6 +2140,10 @@ async function lewati() {
 }
 
 
+/* =========================================
+   PILIH LOKET
+========================================= */
+
 document
     .querySelectorAll(
         ".loket"
@@ -866,7 +2153,7 @@ document
 
             element.addEventListener(
                 "click",
-                function () {
+                async function () {
 
                     loketAktif =
                         this.dataset.counter;
@@ -905,14 +2192,7 @@ document
                         ].petugas;
 
 
-                    renderAntrean(
-                        null
-                    );
-
-
-                    tampilPesan(
-                        "Siap memanggil antrean."
-                    );
+                    await muatAntreanAktif();
 
                 }
             );
@@ -920,6 +2200,10 @@ document
         }
     );
 
+
+/* =========================================
+   BUTTON
+========================================= */
 
 btnPanggil.addEventListener(
     "click",
@@ -950,7 +2234,41 @@ btnLewati.addEventListener(
     lewati
 );
 
+
+/* =========================================
+   INISIALISASI
+========================================= */
+
+renderAntrean(
+    null
+);
+
+
+cekAntreanMenunggu();
+
+
+/*
+ * Cek otomatis setiap 3 detik.
+ */
+
+setInterval(
+    cekAntreanMenunggu,
+    3000
+);
+
+
+/*
+ * Sinkronkan antrean aktif setiap 3 detik.
+ */
+
+setInterval(
+    muatAntreanAktif,
+    3000
+);
+
 </script>
 
+
 </body>
+
 </html>
