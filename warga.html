@@ -1,0 +1,50 @@
+from pathlib import Path
+
+src = Path("/mnt/data/antrean-bersih.html")
+dst = Path("/mnt/data/warga.html")
+
+html = src.read_text(encoding="utf-8")
+
+# On phones, let the main page scroll naturally instead of putting the
+# service list inside a nested scroll box. This is much easier to use
+# inside the WebsiteDesa iframe.
+old = """@media(max-width:850px){
+  .layout{grid-template-columns:1fr}
+}"""
+
+new = """@media(max-width:850px){
+  .layout{grid-template-columns:1fr}
+
+  /* Mobile: use the page's natural vertical scroll */
+  .service-list{
+    max-height:none;
+    overflow:visible;
+    padding-right:0;
+    -webkit-overflow-scrolling:touch;
+    touch-action:pan-y;
+  }
+}"""
+
+if old not in html:
+    raise ValueError("Blok CSS mobile yang dicari tidak ditemukan.")
+
+html = html.replace(old, new, 1)
+
+# Make the mobile iframe-friendly page a little taller by ensuring no
+# accidental nested clipping is introduced.
+dst.write_text(html, encoding="utf-8")
+
+bad = [
+    "from pathlib import Path",
+    'Path("/mnt/data/',
+    "path.write_text(",
+    "print(",
+]
+
+found = [x for x in bad if x in html]
+if found:
+    raise ValueError(f"Teks generator Python masih ditemukan: {found}")
+
+print(f"File warga.html versi mobile berhasil dibuat: {dst}")
+print(f"Ukuran: {dst.stat().st_size:,} byte")
+print("Perubahan: daftar Informasi Pelayanan di HP sekarang mengikuti scroll halaman, bukan scroll kotak terpisah.")
