@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login Laporan Antrean - Desa Bukit Raya</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;font-family:Arial,Helvetica,sans-serif;background:#eef4fa;color:#17365f}
+.card{width:100%;max-width:440px;background:#fff;border-radius:22px;padding:34px;box-shadow:0 12px 40px rgba(20,60,110,.12);border:1px solid #dbe6f2}
+.badge{display:inline-block;background:#ffc400;color:#123b72;font-weight:800;font-size:13px;padding:8px 14px;border-radius:999px;margin-bottom:18px}
+h1{margin:0 0 8px;font-size:30px;color:#123b72}
+p{margin:0 0 25px;color:#667085;line-height:1.5}
+label{display:block;font-weight:700;margin:16px 0 7px}
+input{width:100%;padding:14px;border:1px solid #cbd5e1;border-radius:11px;font-size:16px;outline:none}
+input:focus{border-color:#1459a6;box-shadow:0 0 0 3px rgba(20,89,166,.10)}
+button{width:100%;margin-top:22px;padding:14px;border:0;border-radius:11px;background:#1459a6;color:#fff;font-size:16px;font-weight:800;cursor:pointer}
+button:disabled{opacity:.65;cursor:wait}
+#message{margin-top:16px;padding:12px;border-radius:10px;display:none;font-size:14px;line-height:1.4}
+.error{background:#fff0f0;color:#b42318}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="badge">ADMINISTRASI ANTREAN</div>
+  <h1>Laporan Antrean</h1>
+  <p>Silakan login menggunakan akun yang telah diberikan untuk mengakses laporan pelayanan Desa Bukit Raya.</p>
+  <form id="loginForm">
+    <label for="email">Email</label>
+    <input id="email" type="email" autocomplete="username" required>
+    <label for="password">Password</label>
+    <input id="password" type="password" autocomplete="current-password" required>
+    <button id="loginButton" type="submit">MASUK</button>
+  </form>
+  <div id="message"></div>
+</div>
+<script>
+const SUPABASE_URL="https://pyawggjlbrvneflpsalj.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_5SdvMobBB2AvtXcJd_Scxw_rVsoqM8R";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+const form=document.getElementById("loginForm");
+const email=document.getElementById("email");
+const password=document.getElementById("password");
+const btn=document.getElementById("loginButton");
+const message=document.getElementById("message");
+
+function errorMessage(text){
+  message.textContent=text;
+  message.className="error";
+  message.style.display="block";
+}
+
+async function checkSession(){
+  const {data}=await db.auth.getSession();
+  if(data && data.session){
+    window.location.replace("laporan-antrean.html");
+  }
+}
+checkSession();
+
+form.addEventListener("submit",async function(e){
+  e.preventDefault();
+  btn.disabled=true;
+  btn.textContent="MEMPROSES...";
+  message.style.display="none";
+
+  const {data,error}=await db.auth.signInWithPassword({
+    email:email.value.trim(),
+    password:password.value
+  });
+
+  if(error){
+    btn.disabled=false;
+    btn.textContent="MASUK";
+    errorMessage(error.message || "Login gagal. Periksa email dan password.");
+    return;
+  }
+
+  if(data && data.session){
+    window.location.replace("laporan-antrean.html");
+  }else{
+    btn.disabled=false;
+    btn.textContent="MASUK";
+    errorMessage("Login berhasil, tetapi sesi belum terbentuk.");
+  }
+});
+</script>
+</body>
+</html>
