@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Laporan Antrean - Desa Bukit Raya</title>
+<style>
+:root{--b:#0b3b82;--b2:#1261b5;--y:#f5c400;--bg:#f4f7fb;--w:#fff;--t:#17324d;--m:#6d7d8d;--bd:#dfe7f0;--g:#16834b;--r:#c73535}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--t)}
+.container{width:min(1400px,calc(100% - 28px));margin:auto;padding:24px 0 45px}
+.hero{background:linear-gradient(135deg,var(--b),#0b5da9);color:#fff;border-radius:22px;padding:27px 30px}
+.badge{display:inline-block;background:var(--y);color:var(--t);font-weight:800;padding:7px 12px;border-radius:999px;font-size:12px;margin-bottom:10px}.hero h1{margin:0 0 7px;font-size:clamp(27px,4vw,40px)}.hero p{margin:0;color:#fff;opacity:.88}
+.toolbar,.box,.table-card{margin-top:18px;background:#fff;border:1px solid var(--bd);border-radius:17px;padding:17px;box-shadow:0 8px 25px rgba(16,53,92,.08)}
+.toolbar{display:flex;gap:12px;align-items:end;flex-wrap:wrap}.field{min-width:210px;flex:1}.field label{display:block;font-size:13px;font-weight:800;margin-bottom:7px}input{width:100%;padding:12px;border:1px solid #cbd7e4;border-radius:10px;font-size:14px}
+button{border:0;border-radius:10px;padding:12px 17px;font-weight:800;cursor:pointer}.load{background:var(--y);color:var(--t)}.export{background:var(--b);color:#fff}
+.message{display:none;margin-top:14px;padding:11px 13px;border-radius:10px;font-size:13px}.message.show{display:block}.error{background:#fff0f0;color:var(--r)}.ok{background:#edf9f2;color:var(--g)}
+.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:13px;margin-top:18px}.stat{background:#fff;border:1px solid var(--bd);border-radius:15px;padding:17px}.stat .label{font-size:12px;color:var(--m);font-weight:700}.stat .value{font-size:29px;font-weight:900;color:var(--b);margin-top:5px}
+.box h2,.table-head h2{font-size:18px;margin:0 0 12px;color:var(--b)}.loket-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.loket-card{background:#f7f9fc;border-radius:12px;padding:14px}.loket-card strong{font-size:14px}.loket-card div{font-size:24px;font-weight:900;color:var(--b);margin-top:4px}
+.table-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:13px}.search{max-width:320px}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:1050px}th,td{padding:11px 10px;border-bottom:1px solid var(--bd);text-align:left;font-size:13px;vertical-align:top}th{background:#f3f6fa;color:var(--b);font-size:12px;white-space:nowrap}.queue-code{font-weight:900;color:var(--b)}
+.status{display:inline-block;padding:5px 8px;border-radius:999px;font-weight:800;font-size:11px}.waiting{background:#fff6d5;color:#8a6500}.called{background:#e8f2ff;color:var(--b)}.serving{background:#e8f7ef;color:var(--g)}.completed{background:#e9f7ee;color:var(--g)}.skipped{background:#ffeded;color:var(--r)}
+.empty{text-align:center;color:var(--m);padding:28px}.footer{text-align:center;color:var(--m);font-size:12px;margin-top:20px}
+@media(max-width:900px){.summary{grid-template-columns:repeat(2,1fr)}.loket-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.container{width:calc(100% - 18px);padding-top:12px}.hero{padding:22px 19px}.toolbar{align-items:stretch}.field{min-width:100%}.toolbar button{width:100%}.table-head{align-items:stretch;flex-direction:column}.search{max-width:none}}
+</style>
+</head>
+<body>
+<div class="container">
+<section class="hero"><span class="badge">ADMINISTRASI ANTREAN</span><h1>Laporan Antrean</h1><p>Rekap dan riwayat pelayanan antrean Desa Bukit Raya.</p></section>
+
+<section class="toolbar">
+<div class="field"><label for="date">Tanggal</label><input id="date" type="date"></div>
+<button class="load" id="loadBtn" onclick="loadReport()">MUAT DATA</button>
+<button class="export" onclick="exportCSV()">EXPORT CSV</button>
+</section>
+<div id="message" class="message"></div>
+
+<section class="summary">
+<div class="stat"><div class="label">TOTAL ANTREAN</div><div id="total" class="value">0</div></div>
+<div class="stat"><div class="label">MENUNGGU</div><div id="waiting" class="value">0</div></div>
+<div class="stat"><div class="label">DIPANGGIL / DILAYANI</div><div id="active" class="value">0</div></div>
+<div class="stat"><div class="label">SELESAI</div><div id="completed" class="value">0</div></div>
+<div class="stat"><div class="label">DILEWATI</div><div id="skipped" class="value">0</div></div>
+</section>
+
+<section class="box"><h2>Rekap Per Loket</h2><div id="loketGrid" class="loket-grid"></div></section>
+
+<section class="table-card">
+<div class="table-head"><h2>Detail Antrean</h2><input id="search" class="search" type="search" placeholder="Cari nama, nomor, atau pelayanan..." oninput="renderTable()"></div>
+<div class="table-wrap"><table><thead><tr><th>No.</th><th>Nomor</th><th>Nama Pemohon</th><th>Pelayanan</th><th>Loket</th><th>Status</th><th>Daftar</th><th>Dipanggil</th><th>Mulai Dilayani</th><th>Selesai</th></tr></thead><tbody id="tableBody"></tbody></table></div>
+</section>
+<div class="footer">Pemerintah Desa Bukit Raya</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL="https://pyawggjlbrvneflpsalj.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_5SdvMobBB2AvtXcJd_Scxw_rVsoqM8R";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+let rows=[];
+function localDate(){const d=new Date(),o=d.getTimezoneOffset();return new Date(d.getTime()-o*60000).toISOString().slice(0,10)}
+document.getElementById("date").value=localDate();
+function msg(t,c){const e=document.getElementById("message");e.textContent=t;e.className="message show "+c}
+function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+function time(v){return v?new Date(v).toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit"}):"-"}
+function label(s){return{waiting:"Menunggu",called:"Dipanggil",serving:"Dilayani",completed:"Selesai",skipped:"Dilewati"}[s]||s}
+async function loadReport(){
+ const date=document.getElementById("date").value;if(!date){msg("Pilih tanggal terlebih dahulu.","error");return}
+ const b=document.getElementById("loadBtn");b.disabled=true;b.textContent="MEMUAT...";
+ try{const {data,error}=await db.rpc("laporan_antrean",{p_queue_date:date});if(error)throw error;rows=data||[];update();renderLoket();renderTable();msg("Data antrean berhasil dimuat.","ok")}
+ catch(e){rows=[];update();renderLoket();renderTable();msg("Gagal memuat laporan: "+(e.message||"Terjadi kesalahan."),"error")}
+ finally{b.disabled=false;b.textContent="MUAT DATA"}
+}
+function update(){document.getElementById("total").textContent=rows.length;document.getElementById("waiting").textContent=rows.filter(x=>x.status==="waiting").length;document.getElementById("active").textContent=rows.filter(x=>x.status==="called"||x.status==="serving").length;document.getElementById("completed").textContent=rows.filter(x=>x.status==="completed").length;document.getElementById("skipped").textContent=rows.filter(x=>x.status==="skipped").length}
+function renderLoket(){document.getElementById("loketGrid").innerHTML=["A","B","C","D"].map(c=>'<div class="loket-card"><strong>LOKET '+c+'</strong><div>'+rows.filter(x=>x.counter_code===c).length+'</div></div>').join("")}
+function renderTable(){
+ const q=document.getElementById("search").value.trim().toLowerCase(),a=rows.filter(x=>!q||[x.queue_code,x.customer_name,x.service_name,x.counter_code,x.status].join(" ").toLowerCase().includes(q)),b=document.getElementById("tableBody");
+ if(!a.length){b.innerHTML='<tr><td colspan="10" class="empty">Tidak ada data antrean.</td></tr>';return}
+ b.innerHTML=a.map((x,i)=>'<tr><td>'+(i+1)+'</td><td class="queue-code">'+esc(x.queue_code)+'</td><td>'+esc(x.customer_name)+'</td><td>'+esc(x.service_name)+'</td><td>Loket '+esc(x.counter_code)+'</td><td><span class="status '+esc(x.status)+'">'+label(x.status)+'</span></td><td>'+time(x.created_at)+'</td><td>'+time(x.called_at)+'</td><td>'+time(x.served_at)+'</td><td>'+time(x.completed_at)+'</td></tr>').join("")
+}
+function exportCSV(){
+ if(!rows.length){msg("Belum ada data untuk diekspor.","error");return}
+ const h=["No","Nomor Antrean","Nama Pemohon","Pelayanan","Loket","Status","Waktu Daftar","Waktu Dipanggil","Mulai Dilayani","Selesai"];
+ const d=rows.map((x,i)=>[i+1,x.queue_code,x.customer_name,x.service_name,"Loket "+x.counter_code,label(x.status),x.created_at?new Date(x.created_at).toLocaleString("id-ID"):"",x.called_at?new Date(x.called_at).toLocaleString("id-ID"):"",x.served_at?new Date(x.served_at).toLocaleString("id-ID"):"",x.completed_at?new Date(x.completed_at).toLocaleString("id-ID"):""]);
+ const csv=[h,...d].map(r=>r.map(v=>'"'+String(v??"").replaceAll('"','""')+'"').join(",")).join("\r\n"),blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}),u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="laporan-antrean-"+document.getElementById("date").value+".csv";a.click();URL.revokeObjectURL(u)
+}
+loadReport();
+</script>
+</body>
+</html>
