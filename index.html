@@ -13,13 +13,13 @@ body{padding:20px}
 .destination{padding:12px 8px;border:2px solid #1674b8;border-radius:12px;background:#fff;color:#1674b8;font-weight:700;font-size:14px;cursor:pointer;min-height:62px}.destination small{font-weight:600;opacity:.8}.destination[data-counter='K'],.destination[data-counter='S']{border-color:#7b5bb5;color:#6a479f}.destination[data-counter='K'].active,.destination[data-counter='S'].active{background:#6a479f;color:#fff}
 .destination.active{background:#1674b8;color:#fff}
 .staff{background:#eef6fb;border-radius:14px;padding:18px;text-align:center;margin-bottom:18px}.waiting-alert{display:flex;align-items:center;gap:14px;margin:0 0 18px;padding:15px 20px;border-radius:14px;background:#eaf7ee;border:2px solid #b9dfc5;color:#196b38;transition:.25s;min-height:70px}
-.waiting-alert.has-waiting{background:#fff4cf;border-color:#f2c94c;color:#7a5700}
+.waiting-alert.has-waiting{background:#fff4cf;border-color:#f2c94c;color:#7a5700;animation:pulseAlert 1.8s ease-in-out infinite}
 .waiting-alert .waiting-icon{font-size:27px}
 .waiting-alert strong{font-size:15px;letter-spacing:.3px}
 .waiting-alert div div{font-size:14px;margin-top:3px}
 .waiting-count{margin-left:auto;min-width:48px;height:48px;padding:0 12px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#1d9a54;color:#fff;font-size:22px;font-weight:800}
 .has-waiting .waiting-count{background:#e2a900}
-
+@keyframes pulseAlert{0%,100%{transform:scale(1)}50%{transform:scale(1.01)}}
 
 .staff small{color:#6b7280}
 .staff h2{margin:5px 0;color:#1674b8;font-size:23px}
@@ -171,17 +171,20 @@ async function loadCounterIds(){
 
 async function loadWaitingCount(){
   try{
-    const { data, error } = await db.rpc("get_jumlah_antrean_menunggu", {
+    waitingTitle.textContent = "STATUS ANTREAN";
+    waitingText.textContent = "Memeriksa antrean " + (destinationData[activeCounter]?.title || activeCounter) + "...";
+
+    const raw = await rpc("get_jumlah_antrean_menunggu", {
       p_counter_code: activeCounter
     });
-    if(error) throw error;
 
-    let result = data;
+    let result = raw;
     if(typeof result === "string"){
       try{ result = JSON.parse(result); }catch(e){}
     }
 
     const count = Number(result?.jumlah_menunggu ?? 0);
+
     waitingCount.textContent = count;
     waitingAlert.classList.toggle("has-waiting", count > 0);
 
@@ -197,7 +200,9 @@ async function loadWaitingCount(){
     }
   }catch(e){
     console.error("RPC jumlah antrean menunggu gagal:", e);
-    // Pertahankan tampilan terakhir agar koneksi sesaat tidak menyebabkan kedipan.
+    waitingCount.textContent = "!";
+    waitingTitle.textContent = "GAGAL MEMUAT STATUS";
+    waitingText.textContent = "Periksa koneksi panel ke Supabase.";
   }
 }
 
@@ -211,6 +216,7 @@ async function loadActive(){
   content.innerHTML='<div class="empty">Gagal memuat antrean.</div>';
   showError("KESALAHAN MEMUAT ANTREAN",e);
  }
+ await loadWaitingCount();
 }
 
 async function callNext(){
