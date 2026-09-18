@@ -103,6 +103,7 @@ body{display:flex;align-items:center;justify-content:center}
 .card.audiensi{background:#f7f4fb}
 .card.audiensi .code{color:#68459f}
 .card.audiensi .number{color:#68459f}
+.hidden{display:none !important}
 .card.active{box-shadow:inset 0 0 0 3px #f6c400}
 .card.flash{animation:flash .8s ease}
 @keyframes flash{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
@@ -137,31 +138,31 @@ body{display:flex;align-items:center;justify-content:center}
 
   <section class="card" id="card-A" data-counter="A">
     <div class="code">LOKET A</div><div class="person">Arman</div>
-    <div class="number" id="number-A">0</div><div class="name" id="name-A">Belum dipanggil</div><div class="callstatus" id="status-A">Belum dipanggil</div><div class="waiting" id="waiting-A">MENUNGGU: 0</div>
+    <div class="number" id="number-A">0</div><div class="name hidden" id="name-A"></div><div class="callstatus hidden" id="status-A"></div><div class="waiting" id="waiting-A">MENUNGGU: 0</div>
   </section>
   <section class="card" id="card-B" data-counter="B">
     <div class="code">LOKET B</div><div class="person">Vikio</div>
-    <div class="number" id="number-B">0</div><div class="name" id="name-B">Belum dipanggil</div><div class="callstatus" id="status-B">Belum dipanggil</div><div class="waiting" id="waiting-B">MENUNGGU: 0</div>
+    <div class="number" id="number-B">0</div><div class="name hidden" id="name-B"></div><div class="callstatus hidden" id="status-B"></div><div class="waiting" id="waiting-B">MENUNGGU: 0</div>
   </section>
   <section class="card" id="card-C" data-counter="C">
     <div class="code">LOKET C</div><div class="person">Dilla</div>
-    <div class="number" id="number-C">0</div><div class="name" id="name-C">Belum dipanggil</div><div class="callstatus" id="status-C">Belum dipanggil</div><div class="waiting" id="waiting-C">MENUNGGU: 0</div>
+    <div class="number" id="number-C">0</div><div class="name hidden" id="name-C"></div><div class="callstatus hidden" id="status-C"></div><div class="waiting" id="waiting-C">MENUNGGU: 0</div>
   </section>
   <section class="card" id="card-D" data-counter="D">
     <div class="code">LOKET D</div><div class="person">Ayu</div>
-    <div class="number" id="number-D">0</div><div class="name" id="name-D">Belum dipanggil</div><div class="callstatus" id="status-D">Belum dipanggil</div><div class="waiting" id="waiting-D">MENUNGGU: 0</div>
+    <div class="number" id="number-D">0</div><div class="name hidden" id="name-D"></div><div class="callstatus hidden" id="status-D"></div><div class="waiting" id="waiting-D">MENUNGGU: 0</div>
   </section>
   <section class="card" id="card-E" data-counter="E">
     <div class="code">LOKET E</div><div class="person">Nia</div>
-    <div class="number" id="number-E">0</div><div class="name" id="name-E">Belum dipanggil</div><div class="callstatus" id="status-E">Belum dipanggil</div><div class="waiting" id="waiting-E">MENUNGGU: 0</div>
+    <div class="number" id="number-E">0</div><div class="name hidden" id="name-E"></div><div class="callstatus hidden" id="status-E"></div><div class="waiting" id="waiting-E">MENUNGGU: 0</div>
   </section>
   <section class="card audiensi" id="card-K" data-counter="K">
     <div class="code">KEPALA DESA</div><div class="person">Ruang Audiensi</div>
-    <div class="number" id="number-K">0</div><div class="name" id="name-K">Belum dipanggil</div><div class="callstatus" id="status-K">Belum dipanggil</div><div class="waiting" id="waiting-K">MENUNGGU: 0</div>
+    <div class="number" id="number-K">0</div><div class="name hidden" id="name-K"></div><div class="callstatus hidden" id="status-K"></div><div class="waiting" id="waiting-K">MENUNGGU: 0</div>
   </section>
   <section class="card audiensi" id="card-S" data-counter="S">
     <div class="code">SEKRETARIS DESA</div><div class="person">Ruang Audiensi</div>
-    <div class="number" id="number-S">0</div><div class="name" id="name-S">Belum dipanggil</div><div class="callstatus" id="status-S">Belum dipanggil</div><div class="waiting" id="waiting-S">MENUNGGU: 0</div>
+    <div class="number" id="number-S">0</div><div class="name hidden" id="name-S"></div><div class="callstatus hidden" id="status-S"></div><div class="waiting" id="waiting-S">MENUNGGU: 0</div>
   </section>
 </div>
 
@@ -216,8 +217,10 @@ function updateCard(code, data){
 
   if(!data){
     number.textContent = "0";
-    name.textContent = "Belum dipanggil";
-    status.textContent = "Belum dipanggil";
+    name.textContent = "";
+    status.textContent = "";
+    name.classList.add("hidden");
+    status.classList.add("hidden");
     card.classList.remove("active");
     return;
   }
@@ -225,6 +228,9 @@ function updateCard(code, data){
   number.textContent = data.queue_code || "0";
   name.textContent = data.customer_name || "";
   status.textContent = data.status === "serving" ? "Sedang dilayani" : "Dipanggil";
+
+  name.classList.remove("hidden");
+  status.classList.remove("hidden");
   card.classList.add("active");
 }
 
