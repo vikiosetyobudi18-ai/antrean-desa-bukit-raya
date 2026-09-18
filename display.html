@@ -86,9 +86,16 @@ body{display:flex;align-items:center;justify-content:center}
   font-weight:900;
   color:#9aa7b3;
 }
-.card .waiting{
-  margin-top:5px;
+.card .callstatus{
+  margin-top:6px;
   font-size:10px;
+  line-height:1.05;
+  font-weight:800;
+  color:#182b3f;
+}
+.card .waiting{
+  margin-top:4px;
+  font-size:9px;
   color:#8a97a3;
   text-transform:uppercase;
   letter-spacing:.6px;
@@ -100,11 +107,11 @@ body{display:flex;align-items:center;justify-content:center}
 .card.flash{animation:flash .8s ease}
 @keyframes flash{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
 #soundButton{
-  position:fixed;right:8px;bottom:2px;z-index:10;
+  position:fixed;right:8px;bottom:8px;z-index:10;
   border:0;border-radius:8px;padding:8px 11px;
   background:#f6c400;color:#09223f;font-weight:800;font-size:12px;cursor:pointer;
 }
-#clock{display:none}
+#clock{display:none !important}
 @media(max-width:1200px){
  .display{grid-template-columns:220px repeat(7,minmax(0,1fr));gap:4px;padding:4px}
  .brand{padding:12px 10px} .brand h1{font-size:22px} .brand .small{font-size:10px}
@@ -130,31 +137,31 @@ body{display:flex;align-items:center;justify-content:center}
 
   <section class="card" id="card-A" data-counter="A">
     <div class="code">LOKET A</div><div class="person">Arman</div>
-    <div class="number" id="number-A">0</div><div class="name" id="name-A">Belum dipanggil</div><div class="waiting" id="status-A">Menunggu</div>
+    <div class="number" id="number-A">0</div><div class="name" id="name-A">Belum dipanggil</div><div class="callstatus" id="status-A">Belum dipanggil</div><div class="waiting" id="waiting-A">MENUNGGU: 0</div>
   </section>
   <section class="card" id="card-B" data-counter="B">
     <div class="code">LOKET B</div><div class="person">Vikio</div>
-    <div class="number" id="number-B">0</div><div class="name" id="name-B">Belum dipanggil</div><div class="waiting" id="status-B">Menunggu</div>
+    <div class="number" id="number-B">0</div><div class="name" id="name-B">Belum dipanggil</div><div class="callstatus" id="status-B">Belum dipanggil</div><div class="waiting" id="waiting-B">MENUNGGU: 0</div>
   </section>
   <section class="card" id="card-C" data-counter="C">
     <div class="code">LOKET C</div><div class="person">Dilla</div>
-    <div class="number" id="number-C">0</div><div class="name" id="name-C">Belum dipanggil</div><div class="waiting" id="status-C">Menunggu</div>
+    <div class="number" id="number-C">0</div><div class="name" id="name-C">Belum dipanggil</div><div class="callstatus" id="status-C">Belum dipanggil</div><div class="waiting" id="waiting-C">MENUNGGU: 0</div>
   </section>
   <section class="card" id="card-D" data-counter="D">
     <div class="code">LOKET D</div><div class="person">Ayu</div>
-    <div class="number" id="number-D">0</div><div class="name" id="name-D">Belum dipanggil</div><div class="waiting" id="status-D">Menunggu</div>
+    <div class="number" id="number-D">0</div><div class="name" id="name-D">Belum dipanggil</div><div class="callstatus" id="status-D">Belum dipanggil</div><div class="waiting" id="waiting-D">MENUNGGU: 0</div>
   </section>
   <section class="card" id="card-E" data-counter="E">
     <div class="code">LOKET E</div><div class="person">Nia</div>
-    <div class="number" id="number-E">0</div><div class="name" id="name-E">Belum dipanggil</div><div class="waiting" id="status-E">Menunggu</div>
+    <div class="number" id="number-E">0</div><div class="name" id="name-E">Belum dipanggil</div><div class="callstatus" id="status-E">Belum dipanggil</div><div class="waiting" id="waiting-E">MENUNGGU: 0</div>
   </section>
   <section class="card audiensi" id="card-K" data-counter="K">
     <div class="code">KEPALA DESA</div><div class="person">Ruang Audiensi</div>
-    <div class="number" id="number-K">0</div><div class="name" id="name-K">Belum dipanggil</div><div class="waiting" id="status-K">Menunggu</div>
+    <div class="number" id="number-K">0</div><div class="name" id="name-K">Belum dipanggil</div><div class="callstatus" id="status-K">Belum dipanggil</div><div class="waiting" id="waiting-K">MENUNGGU: 0</div>
   </section>
   <section class="card audiensi" id="card-S" data-counter="S">
     <div class="code">SEKRETARIS DESA</div><div class="person">Ruang Audiensi</div>
-    <div class="number" id="number-S">0</div><div class="name" id="name-S">Belum dipanggil</div><div class="waiting" id="status-S">Menunggu</div>
+    <div class="number" id="number-S">0</div><div class="name" id="name-S">Belum dipanggil</div><div class="callstatus" id="status-S">Belum dipanggil</div><div class="waiting" id="waiting-S">MENUNGGU: 0</div>
   </section>
 </div>
 
@@ -210,7 +217,7 @@ function updateCard(code, data){
   if(!data){
     number.textContent = "0";
     name.textContent = "Belum dipanggil";
-    status.textContent = "Menunggu";
+    status.textContent = "Belum dipanggil";
     card.classList.remove("active");
     return;
   }
@@ -250,9 +257,8 @@ function announcementChime(){
     // Public-address announcement chime: clean, short airport-style ding-dong.
     // It is synthesized locally, so no audio file is required.
     const notes = [
-      {freq: 784.00, start: 0.00, duration: 0.34, volume: 0.18},
-      {freq: 587.33, start: 0.20, duration: 0.48, volume: 0.16},
-      {freq: 659.25, start: 0.48, duration: 0.30, volume: 0.08}
+      {freq: 659.25, start: 0.00, duration: 0.28, volume: 0.17},
+      {freq: 523.25, start: 0.22, duration: 0.48, volume: 0.15}
     ];
 
     notes.forEach(n => {
@@ -300,7 +306,7 @@ function speak(code, data){
     u.volume = 1;
     u.onend = () => { speakingKey = null; };
     window.speechSynthesis.speak(u);
-  }, 520);
+  }, 700);
 }
 
 async function loadWaiting(code){
@@ -314,9 +320,9 @@ async function loadWaiting(code){
     if(lastWaiting[code] === count) return;
     lastWaiting[code] = count;
 
-    const status = document.getElementById("status-" + code);
-    if(status){
-      status.textContent = "MENUNGGU: " + count;
+    const waiting = document.getElementById("waiting-" + code);
+    if(waiting){
+      waiting.textContent = "MENUNGGU: " + count;
     }
   }catch(e){
     console.error("Waiting " + code, e);
@@ -361,7 +367,7 @@ document.getElementById("soundButton").addEventListener("click", () => {
     test.lang = "id-ID";
     test.rate = .85;
     window.speechSynthesis.speak(test);
-  }, 520);
+  }, 700);
 });
 
 function clock(){
