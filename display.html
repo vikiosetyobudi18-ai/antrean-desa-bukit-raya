@@ -100,15 +100,11 @@ body{display:flex;align-items:center;justify-content:center}
 .card.flash{animation:flash .8s ease}
 @keyframes flash{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
 #soundButton{
-  position:fixed;right:8px;bottom:8px;z-index:10;
+  position:fixed;right:8px;bottom:2px;z-index:10;
   border:0;border-radius:8px;padding:8px 11px;
   background:#f6c400;color:#09223f;font-weight:800;font-size:12px;cursor:pointer;
 }
-#clock{
-  position:fixed;left:8px;bottom:8px;z-index:10;
-  color:#d9e8f4;font-size:11px;background:rgba(0,0,0,.2);
-  padding:5px 8px;border-radius:6px
-}
+#clock{display:none}
 @media(max-width:1200px){
  .display{grid-template-columns:220px repeat(7,minmax(0,1fr));gap:4px;padding:4px}
  .brand{padding:12px 10px} .brand h1{font-size:22px} .brand .small{font-size:10px}
@@ -128,7 +124,6 @@ body{display:flex;align-items:center;justify-content:center}
 <body>
 <div class="display">
   <section class="brand">
-    <div class="small">PEMERINTAH DESA</div>
     <h1>ANTREAN<br>PELAYANAN</h1>
     <div class="village">DESA BUKIT RAYA</div>
   </section>
@@ -171,6 +166,7 @@ const SUPABASE_URL = 'https://pyawggjlbrvneflpsalj.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_5SdvMobBB2AvtXcJd_Scxw_rVsoqM8R';
 const COUNTERS = ["A","B","C","D","E","K","S"];
 const lastState = Object.fromEntries(COUNTERS.map(c => [c, null]));
+const lastWaiting = Object.fromEntries(COUNTERS.map(c => [c, null]));
 let suaraAktif = false;
 let speakingKey = null;
 
@@ -251,12 +247,12 @@ function announcementChime(){
 
     const now = audioContext.currentTime;
 
-    // Announcement chime: short "ding-tong" with a soft third note.
-    // This is intentionally brief so the spoken announcement follows quickly.
+    // Public-address announcement chime: clean, short airport-style ding-dong.
+    // It is synthesized locally, so no audio file is required.
     const notes = [
-      {freq: 880,  start: 0.00, duration: 0.34, volume: 0.20},
-      {freq: 659.25,start: 0.18, duration: 0.42, volume: 0.18},
-      {freq: 783.99,start: 0.42, duration: 0.28, volume: 0.12}
+      {freq: 784.00, start: 0.00, duration: 0.34, volume: 0.18},
+      {freq: 587.33, start: 0.20, duration: 0.48, volume: 0.16},
+      {freq: 659.25, start: 0.48, duration: 0.30, volume: 0.08}
     ];
 
     notes.forEach(n => {
@@ -304,7 +300,27 @@ function speak(code, data){
     u.volume = 1;
     u.onend = () => { speakingKey = null; };
     window.speechSynthesis.speak(u);
-  }, 350);
+  }, 520);
+}
+
+async function loadWaiting(code){
+  try{
+    const raw = await rpc("get_jumlah_antrean_menunggu", {p_counter_code:code});
+    let data = raw;
+    if(typeof data === "string"){
+      try{ data = JSON.parse(data); }catch{ data = null; }
+    }
+    const count = Number(data?.jumlah_menunggu ?? 0);
+    if(lastWaiting[code] === count) return;
+    lastWaiting[code] = count;
+
+    const status = document.getElementById("status-" + code);
+    if(status){
+      status.textContent = "MENUNGGU: " + count;
+    }
+  }catch(e){
+    console.error("Waiting " + code, e);
+  }
 }
 
 async function loadCounter(code){
@@ -329,7 +345,7 @@ async function loadCounter(code){
 }
 
 async function refresh(){
-  await Promise.all(COUNTERS.map(loadCounter));
+  await Promise.all(COUNTERS.flatMap(code => [loadCounter(code), loadWaiting(code)]));
 }
 
 document.getElementById("soundButton").addEventListener("click", () => {
@@ -345,7 +361,7 @@ document.getElementById("soundButton").addEventListener("click", () => {
     test.lang = "id-ID";
     test.rate = .85;
     window.speechSynthesis.speak(test);
-  }, 350);
+  }, 520);
 });
 
 function clock(){
@@ -355,8 +371,6 @@ function clock(){
     " • " +
     d.toLocaleTimeString("id-ID", {hour:"2-digit",minute:"2-digit",second:"2-digit"});
 }
-clock();
-setInterval(clock,1000);
 refresh();
 setInterval(refresh,1000);
 </script>
