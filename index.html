@@ -12,7 +12,15 @@ body{padding:20px}
 .destinations{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px}
 .destination{padding:12px 8px;border:2px solid #1674b8;border-radius:12px;background:#fff;color:#1674b8;font-weight:700;font-size:14px;cursor:pointer;min-height:62px}.destination small{font-weight:600;opacity:.8}.destination[data-counter='K'],.destination[data-counter='S']{border-color:#7b5bb5;color:#6a479f}.destination[data-counter='K'].active,.destination[data-counter='S'].active{background:#6a479f;color:#fff}
 .destination.active{background:#1674b8;color:#fff}
-.staff{background:#eef6fb;border-radius:14px;padding:18px;text-align:center;margin-bottom:18px}
+.staff{background:#eef6fb;border-radius:14px;padding:18px;text-align:center;margin-bottom:18px}.waiting-alert{display:flex;align-items:center;gap:14px;margin:0 0 18px;padding:15px 20px;border-radius:14px;background:#eaf7ee;border:2px solid #b9dfc5;color:#196b38;transition:.25s;min-height:70px}
+.waiting-alert.has-waiting{background:#fff4cf;border-color:#f2c94c;color:#7a5700;animation:pulseAlert 1.8s ease-in-out infinite}
+.waiting-alert .waiting-icon{font-size:27px}
+.waiting-alert strong{font-size:15px;letter-spacing:.3px}
+.waiting-alert div div{font-size:14px;margin-top:3px}
+.waiting-count{margin-left:auto;min-width:48px;height:48px;padding:0 12px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#1d9a54;color:#fff;font-size:22px;font-weight:800}
+.has-waiting .waiting-count{background:#e2a900}
+@keyframes pulseAlert{0%,100%{transform:scale(1)}50%{transform:scale(1.01)}}
+
 .staff small{color:#6b7280}
 .staff h2{margin:5px 0;color:#1674b8;font-size:23px}
 .staff div{font-size:17px}
@@ -32,13 +40,21 @@ body{padding:20px}
 .recall{background:#f0ad4e}.start{background:#28a745}.done{background:#20a0a0}.skip{background:#dc3545}
 .note{margin-top:15px;color:#777;font-size:13px}
 @media(max-width:760px){
- body{padding:12px}.destinations{grid-template-columns:repeat(2,1fr)}.number{font-size:64px}.name{font-size:22px}.actions{grid-template-columns:1fr}.next{grid-column:span 1}
+ body{padding:12px}.destinations{grid-template-columns:repeat(2,1fr)}.waiting-alert{padding:12px}.waiting-alert div div{font-size:12px}.waiting-count{min-width:42px;height:42px}.number{font-size:64px}.name{font-size:22px}.actions{grid-template-columns:1fr}.next{grid-column:span 1}
 }
 </style></head>
 <body><main class="app">
 <header class="header"><h1>Panel Antrean Pelayanan</h1><p>Desa Bukit Raya</p></header>
 <section class="destinations"><button class="destination" data-counter="A">LOKET A<br><small>Arman</small></button><button class="destination" data-counter="B">LOKET B<br><small>Vikio</small></button><button class="destination" data-counter="C">LOKET C<br><small>Dilla</small></button><button class="destination" data-counter="D">LOKET D<br><small>Ayu</small></button><button class="destination" data-counter="E">LOKET E<br><small>Nia</small></button><button class="destination" data-counter="K">🏛️ KEPALA DESA</button><button class="destination" data-counter="S">🏢 SEKRETARIS DESA</button></section>
 <section class="staff"><small>PETUGAS</small><h2 id="destinationTitle">LOKET B</h2><div id="personName">Vikio</div></section>
+<section id="waitingAlert" class="waiting-alert">
+  <span class="waiting-icon">🔔</span>
+  <div>
+    <strong id="waitingTitle">ANTREAN MENUNGGU</strong>
+    <div id="waitingText">Memeriksa antrean...</div>
+  </div>
+  <span id="waitingCount" class="waiting-count">0</span>
+</section>
 <section class="card">
 <div id="queueContent"><div class="empty">Memuat antrean...</div></div>
 <div id="message" class="message"></div><div id="errorBox" class="error"></div>
@@ -79,6 +95,11 @@ const btnRecall=document.getElementById("btnRecall");
 const btnStart=document.getElementById("btnStart");
 const btnDone=document.getElementById("btnDone");
 const btnSkip=document.getElementById("btnSkip");
+const waitingAlert=document.getElementById("waitingAlert");
+const waitingTitle=document.getElementById("waitingTitle");
+const waitingText=document.getElementById("waitingText");
+const waitingCount=document.getElementById("waitingCount");
+let counterIds={};
 
 function esc(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
 function showMessage(t){message.textContent=t||"";}
@@ -132,6 +153,53 @@ function speak(data){
  const u=new SpeechSynthesisUtterance("Nomor antrean "+String(data.queue_code||"").replace("-"," ")+", atas nama "+(data.customer_name||"")+", silakan menuju "+destination+".");
  u.lang="id-ID";u.rate=.85;u.pitch=1;u.volume=1;
  window.speechSynthesis.speak(u);
+}
+
+async function loadCounterIds(){
+  try{
+    const r=await fetch(SUPABASE_URL+"/rest/v1/counters?select=id,code&is_active=eq.true",{
+      headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY,Accept:"application/json"}
+    });
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const rows=await r.json();
+    counterIds={};
+    rows.forEach(x=>{counterIds[String(x.code).toUpperCase()]=x.id;});
+  }catch(e){
+    console.error("Gagal memuat daftar loket:",e);
+  }
+}
+
+async function loadWaitingCount(){
+  try{
+    if(!counterIds[activeCounter]) await loadCounterIds();
+    const cid=counterIds[activeCounter];
+    if(!cid) return;
+
+    const r=await fetch(
+      SUPABASE_URL+"/rest/v1/queues?select=id&queue_date=eq."+new Date().toISOString().slice(0,10)+"&status=eq.waiting&counter_id=eq."+encodeURIComponent(cid),
+      {headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY,Accept:"application/json"}}
+    );
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const rows=await r.json();
+    const count=Array.isArray(rows)?rows.length:0;
+
+    waitingCount.textContent=count;
+    waitingAlert.classList.toggle("has-waiting",count>0);
+
+    if(count>0){
+      waitingTitle.textContent="ADA ANTREAN MENUNGGU";
+      waitingText.textContent=count===1
+        ? "1 warga sedang menunggu untuk "+(destinationData[activeCounter]?.title||"tujuan ini")+"."
+        : count+" warga sedang menunggu untuk "+(destinationData[activeCounter]?.title||"tujuan ini")+".";
+    }else{
+      waitingTitle.textContent="TIDAK ADA ANTREAN MENUNGGU";
+      waitingText.textContent="Belum ada warga yang menunggu di "+(destinationData[activeCounter]?.title||"tujuan ini")+".";
+    }
+  }catch(e){
+    console.error("Gagal memuat jumlah antrean menunggu:",e);
+    waitingTitle.textContent="STATUS ANTREAN";
+    waitingText.textContent="Jumlah antrean sedang diperbarui...";
+  }
 }
 
 async function loadActive(){
