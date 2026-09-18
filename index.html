@@ -70,7 +70,6 @@ body{padding:20px}
 <script>
 const SUPABASE_URL='https://pyawggjlbrvneflpsalj.supabase.co';
 const SUPABASE_KEY='sb_publishable_5SdvMobBB2AvtXcJd_Scxw_rVsoqM8R';
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const FIXED_COUNTER=null;
 
 const destinationData={
@@ -175,13 +174,11 @@ async function loadWaitingCount(){
     waitingTitle.textContent = "MEMUAT STATUS ANTREAN";
     waitingText.textContent = "Memeriksa antrean " + (destinationData[activeCounter]?.title || activeCounter) + "...";
 
-    const { data, error } = await db.rpc("get_jumlah_antrean_menunggu", {
+    const raw = await rpc("get_jumlah_antrean_menunggu", {
       p_counter_code: activeCounter
     });
 
-    if(error) throw error;
-
-    let result = data;
+    let result = raw;
     if(typeof result === "string"){
       try{ result = JSON.parse(result); }catch(e){}
     }
@@ -270,12 +267,12 @@ document.querySelectorAll(".destination").forEach(btn=>btn.addEventListener("cli
  await loadWaitingCount();
 }));
 
-(function init(){
+(async function init(){
  const d=destinationData[activeCounter];
  destinationTitle.textContent=d.title;
  personName.textContent=d.person;
  document.querySelectorAll(".destination").forEach(btn=>btn.classList.toggle("active",btn.dataset.counter===activeCounter));
- loadCounterIds();
+ await loadCounterIds();
  await loadActive();
  await loadWaitingCount();
  setInterval(loadActive,5000);
