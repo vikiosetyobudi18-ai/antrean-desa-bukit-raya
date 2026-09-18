@@ -949,19 +949,17 @@ async function cekAntreanAktif() {
                 dataSebelumnya[kode];
 
 
-            const idSekarang =
-                data?.queue_id || null;
+            const callSekarang =
+    data?.call_id || null;
 
+const callSebelumnya =
+    sebelumnya?.call_id || null;
 
-            const idSebelumnya =
-                sebelumnya?.queue_id || null;
-
-
-            if (
-                idSekarang &&
-                idSekarang !== idSebelumnya
-            ) {
-
+if (
+    callSekarang &&
+    callSekarang !== callSebelumnya
+) {
+    
                 const counter =
                     document.getElementById(
                         "counter-" + kode
