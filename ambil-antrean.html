@@ -65,8 +65,15 @@ input:focus,select:focus{border-color:var(--blue2);box-shadow:0 0 0 3px rgba(18,
 <p class="card-subtitle">Isi nama dan pilih kategori pelayanan. Nomor antrean akan diberikan secara otomatis.</p>
 <label for="customerName">Nama Pemohon</label>
 <input id="customerName" type="text" maxlength="100" placeholder="Masukkan nama lengkap" autocomplete="name">
-<label for="serviceSelect">Kategori Pelayanan</label>
-<select id="serviceSelect"><option value="">Memuat pelayanan...</option></select>
+<label for="categorySelect">Kategori Pelayanan</label>
+<select id="categorySelect"><option value="">Memuat kategori...</option></select>
+<label for="serviceSelect">Jenis Pelayanan</label>
+<select id="serviceSelect" disabled><option value="">Pilih kategori terlebih dahulu</option></select>
+<div id="audiensiBox" style="display:none">
+<label for="maksudAudiensi">Tujuan / Maksud Audiensi <span style="color:var(--danger)">*</span></label>
+<textarea id="maksudAudiensi" maxlength="1000" placeholder="Jelaskan tujuan atau maksud audiensi" rows="5" style="width:100%;border:1px solid #cbd7e4;border-radius:12px;padding:13px 14px;font-size:15px;outline:none;background:#fff;resize:vertical;font-family:inherit"></textarea>
+<div style="margin-top:6px;color:var(--muted);font-size:12px;line-height:1.45">Wajib diisi untuk pengajuan audiensi.</div>
+</div>
 <button class="primary-btn" id="takeQueueBtn" onclick="ambilNomor()">AMBIL NOMOR ANTREAN</button>
 <div id="statusBox" class="status"></div>
 <div id="ticket" class="ticket">
@@ -100,6 +107,16 @@ const SUPABASE_URL="https://pyawggjlbrvneflpsalj.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_5SdvMobBB2AvtXcJd_Scxw_rVsoqM8R";
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 
+const CATEGORY_CONFIG=[
+ {name:"Administrasi Kependudukan",code:"B",info:"13 jenis layanan"},
+ {name:"Administrasi Pernikahan",code:"D",info:"2 jenis layanan"},
+ {name:"Administrasi Umum",code:"C",info:"9 jenis layanan"},
+ {name:"Pajak Bumi dan Bangunan",code:"A",info:"4 jenis layanan"},
+ {name:"Pertanahan",code:"A",info:"5 jenis layanan"},
+ {name:"Kesejahteraan",code:"E",info:"7 jenis layanan"},
+ {name:"Audiensi",code:"",info:"2 tujuan audiensi"}
+];
+
 const SERVICE_INFO={
 "Administrasi Kependudukan":[
 "Batal Pindah Kabupaten Kota",
@@ -120,15 +137,26 @@ const SERVICE_INFO={
 "Penerbitan Pengantar Surat Keterangan Catatan Kepolisian","Penerbitan Surat Keterangan Beda Nama",
 "Penerbitan Surat Keterangan Domisili Organisasi Instansi Perusahaan","Penerbitan Surat Keterangan Gaib",
 "Penerbitan Surat Keterangan Pekerjaan",
-"Penerbitan Surat Pernyataan Ahli Waris, Surat Keterangan Ahli Waris, dan Surat Kuasa Ahli Waris"],
-"Kesejahteraan":["Penerbitan Surat Keterangan Penghasilan","Penerbitan Surat Keterangan Tidak Mampu","Penerbitan Surat Keterangan Tidak Memiliki","Penerbitan Surat Keterangan Usaha"],
+"Penerbitan Surat Pernyataan Ahli Waris, Surat Keterangan Ahli Waris, dan Surat Kuasa Ahli Waris",
+"Penerbitan Surat Keterangan Usaha"],
 "Pajak Bumi dan Bangunan":["Pembayaran Pajak Bumi dan Bangunan","Pemutakhiran Pajak Bumi dan Bangunan","Pendaftaran Pajak Bumi dan Bangunan","Penghapusan Pajak Bumi dan Bangunan"],
-"Pertanahan":["Pendaftaran Surat Pernyataan Penguasaan Fisik Bidang Tanah","Penerbitan Surat Keterangan Ganti Nama Desa","Penerbitan Surat Keterangan Hibah","Penerbitan Surat Keterangan Kepemilikan Tanah","Penerbitan Surat Keterangan Tanah Tidak Sengketa"]
+"Pertanahan":["Pendaftaran Surat Pernyataan Penguasaan Fisik Bidang Tanah","Penerbitan Surat Keterangan Ganti Nama Desa","Penerbitan Surat Keterangan Hibah","Penerbitan Surat Keterangan Kepemilikan Tanah","Penerbitan Surat Keterangan Tanah Tidak Sengketa"],
+"Kesejahteraan":[
+"BPJS Kesehatan - Pengajuan Peserta yang Belum Memiliki Jaminan Kesehatan ke PBPU dan BP Pemda Provinsi",
+"BPJS Kesehatan - Pengalihan Segmen Peserta PBI JK Tidak Aktif ke PBPU dan BP Pemda Provinsi",
+"BPJS Kesehatan - Pengalihan Segmen Peserta PBPU Mandiri ke PBPU dan BP Pemda Provinsi",
+"BPJS Kesehatan - Pengalihan Segmen Peserta PPU-BU PPU-PN ke PBPU dan BP Pemda Provinsi",
+"Penerbitan Surat Keterangan Penghasilan","Penerbitan Surat Keterangan Tidak Mampu","Penerbitan Surat Keterangan Tidak Memiliki"],
+"Audiensi":["Audiensi Bersama Kepala Desa","Audiensi Bersama Sekretaris Desa"]
 };
 
 let pelayanan=[];
+let selectedCategory="";
+const categorySelect=document.getElementById("categorySelect");
 const serviceSelect=document.getElementById("serviceSelect");
 const customerName=document.getElementById("customerName");
+const maksudAudiensi=document.getElementById("maksudAudiensi");
+const audiensiBox=document.getElementById("audiensiBox");
 const takeQueueBtn=document.getElementById("takeQueueBtn");
 const statusBox=document.getElementById("statusBox");
 const ticket=document.getElementById("ticket");
@@ -139,59 +167,117 @@ const counterBadge=document.getElementById("counterBadge");
 
 function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
 function status(msg,type){statusBox.textContent=msg;statusBox.className="status show "+type}
-
-function renderInfo(item){
- if(!item){serviceTitle.textContent="Pilih kategori pelayanan";counterBadge.textContent="-";serviceList.innerHTML='<div class="empty">Pilih salah satu kategori di atas untuk melihat daftar layanan.</div>';return}
- serviceTitle.textContent=item.name;counterBadge.textContent="Loket "+(item.counters?.code||"-");
- const list=SERVICE_INFO[item.name]||[];
- serviceList.innerHTML=list.length?list.map(x=>'<div class="service-item"><span class="dot"></span><span>'+esc(x)+'</span></div>').join(""):'<div class="empty">Informasi layanan belum tersedia.</div>';
+function configFor(name){return CATEGORY_CONFIG.find(x=>x.name===name)||null}
+function serviceByName(name){return pelayanan.find(x=>x.name===name)||null}
+function isAudiensiService(item){return !!item && (item.name==="Audiensi Bersama Kepala Desa" || item.name==="Audiensi Bersama Sekretaris Desa")}
+function tujuanText(item){
+ if(!item)return "-";
+ if(item.counters?.code==="K")return "Ruang Kepala Desa";
+ if(item.counters?.code==="S")return "Ruang Sekretaris Desa";
+ return "Loket "+(item.counters?.code||"-");
 }
 
 function renderCategories(){
  categoryGrid.innerHTML="";
- pelayanan.forEach(item=>{
-  const d=document.createElement("div");d.className="category";d.dataset.id=item.id;
-  d.innerHTML="<strong>"+esc(item.name)+"</strong><span>"+((SERVICE_INFO[item.name]||[]).length)+" jenis layanan</span>";
-  d.onclick=()=>{serviceSelect.value=String(item.id);document.querySelectorAll(".category").forEach(x=>x.classList.remove("active"));d.classList.add("active");renderInfo(item)};
+ CATEGORY_CONFIG.forEach(item=>{
+  const d=document.createElement("div");
+  d.className="category";
+  d.dataset.name=item.name;
+  d.innerHTML="<strong>"+esc(item.name)+"</strong><span>"+esc(item.info)+"</span>";
+  d.onclick=()=>selectCategory(item.name);
   categoryGrid.appendChild(d);
  });
 }
 
-async function loadPelayanan(){
- const {data,error}=await db.from("services").select("id,name,prefix,counter_id,counters(code,name)").eq("is_active",true).order("id");
- if(error){serviceSelect.innerHTML='<option value="">Gagal memuat pelayanan</option>';status("Pelayanan tidak dapat dimuat. Silakan muat ulang halaman.","error");return}
- pelayanan=data||[];
- serviceSelect.innerHTML='<option value="">-- Pilih kategori pelayanan --</option>'+pelayanan.map(x=>'<option value="'+x.id+'">'+esc(x.name)+" — Loket "+esc(x.counters?.code||"-")+"</option>").join("");
- renderCategories();
- if(pelayanan.length){serviceSelect.value=String(pelayanan[0].id);renderInfo(pelayanan[0]);document.querySelector(".category")?.classList.add("active")}
+function selectCategory(name){
+ selectedCategory=name;
+ categorySelect.value=name;
+ document.querySelectorAll(".category").forEach(x=>x.classList.toggle("active",x.dataset.name===name));
+ const names=SERVICE_INFO[name]||[];
+ const available=names.map(serviceByName).filter(Boolean);
+ serviceSelect.disabled=!available.length;
+ serviceSelect.innerHTML='<option value="">-- Pilih jenis pelayanan --</option>'+available.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join("");
+ serviceTitle.textContent=name;
+ const cfg=configFor(name);
+ counterBadge.textContent=cfg?.code?("Loket "+cfg.code):"Audiensi";
+ serviceList.innerHTML=names.length?names.map(x=>'<div class="service-item"><span class="dot"></span><span>'+esc(x)+'</span></div>').join(""):'<div class="empty">Informasi layanan belum tersedia.</div>';
+ audiensiBox.style.display="none";
+ maksudAudiensi.value="";
 }
+
+function renderInfo(item){
+ if(!item){return}
+ const cfg=CATEGORY_CONFIG.find(c=>(SERVICE_INFO[c.name]||[]).includes(item.name));
+ counterBadge.textContent=tujuanText(item);
+ serviceTitle.textContent=cfg?.name||"Informasi Pelayanan";
+ const names=SERVICE_INFO[cfg?.name]||[item.name];
+ serviceList.innerHTML=names.map(x=>'<div class="service-item"><span class="dot"></span><span>'+esc(x)+'</span></div>').join("");
+ audiensiBox.style.display=isAudiensiService(item)?"block":"none";
+}
+
+categorySelect.onchange=function(){
+ if(!this.value){serviceSelect.disabled=true;serviceSelect.innerHTML='<option value="">Pilih kategori terlebih dahulu</option>';audiensiBox.style.display="none";return}
+ selectCategory(this.value);
+};
 
 serviceSelect.onchange=function(){
  const item=pelayanan.find(x=>String(x.id)===String(this.value));
- document.querySelectorAll(".category").forEach(x=>x.classList.toggle("active",x.dataset.id===String(this.value)));
  renderInfo(item);
+ if(item && isAudiensiService(item)){
+  audiensiBox.style.display="block";
+ }else{
+  audiensiBox.style.display="none";
+  maksudAudiensi.value="";
+ }
 };
+
+async function loadPelayanan(){
+ const {data,error}=await db.from("services").select("id,name,prefix,counter_id,counters(code,name)").eq("is_active",true).order("id");
+ if(error){
+  categorySelect.innerHTML='<option value="">Gagal memuat kategori</option>';
+  status("Pelayanan tidak dapat dimuat. Silakan muat ulang halaman.","error");
+  return;
+ }
+ pelayanan=data||[];
+ categorySelect.innerHTML='<option value="">-- Pilih kategori pelayanan --</option>'+CATEGORY_CONFIG.map(x=>'<option value="'+esc(x.name)+'">'+esc(x.name)+'</option>').join("");
+ renderCategories();
+}
 
 async function ambilNomor(){
  statusBox.className="status";ticket.classList.remove("show");
- const nama=customerName.value.trim(), serviceId=serviceSelect.value;
+ const nama=customerName.value.trim();
+ const serviceId=serviceSelect.value;
+ const item=pelayanan.find(x=>String(x.id)===String(serviceId));
+ const maksud=maksudAudiensi.value.trim();
  if(!nama){status("Nama pemohon wajib diisi.","error");customerName.focus();return}
- if(!serviceId){status("Silakan pilih kategori pelayanan terlebih dahulu.","error");serviceSelect.focus();return}
+ if(!serviceId || !item){status("Silakan pilih jenis pelayanan terlebih dahulu.","error");serviceSelect.focus();return}
+ if(isAudiensiService(item) && !maksud){status("Tujuan/maksud audiensi wajib diisi.","error");maksudAudiensi.focus();return}
  takeQueueBtn.disabled=true;takeQueueBtn.textContent="MEMPROSES...";
  try{
-  const {data,error}=await db.rpc("ambil_nomor_antrean",{p_service_id:Number(serviceId),p_customer_name:nama});
+  const {data,error}=await db.rpc("ambil_nomor_antrean",{
+   p_service_id:Number(serviceId),
+   p_customer_name:nama,
+   p_maksud_audiensi:maksud||null
+  });
   if(error)throw new Error(error.message||"Gagal mengambil nomor antrean.");
   const r=Array.isArray(data)?data[0]:data;
   if(!r||!r.queue_code)throw new Error("Nomor antrean tidak berhasil dibuat.");
   document.getElementById("ticketNumber").textContent=r.queue_code;
   document.getElementById("ticketName").textContent=r.customer_name;
   document.getElementById("ticketService").textContent=r.service_name||"Pelayanan";
-  document.getElementById("ticketCounter").textContent="Loket "+(r.counter_code||"-");
+  document.getElementById("ticketCounter").textContent=r.counter_code==="K"?"Ruang Kepala Desa":(r.counter_code==="S"?"Ruang Sekretaris Desa":"Loket "+(r.counter_code||"-"));
   ticket.classList.add("show");
-  status("Nomor antrean berhasil diambil. Silakan menunggu panggilan pada layar antrean.","success");
- }catch(e){console.error(e);status(e.message||"Terjadi kesalahan. Silakan coba lagi.","error")}
- finally{takeQueueBtn.disabled=false;takeQueueBtn.textContent="AMBIL NOMOR ANTREAN"}
+  status("Nomor antrean berhasil diambil. Silakan menunggu panggilan.","success");
+  maksudAudiensi.value="";
+ }catch(e){
+  console.error(e);
+  status(e.message||"Terjadi kesalahan. Silakan coba lagi.","error");
+ }finally{
+  takeQueueBtn.disabled=false;
+  takeQueueBtn.textContent="AMBIL NOMOR ANTREAN";
+ }
 }
+
 customerName.onkeydown=e=>{if(e.key==="Enter")ambilNomor()};
 loadPelayanan();
 </script>
