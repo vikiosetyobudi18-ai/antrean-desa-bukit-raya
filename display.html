@@ -10,7 +10,9 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#
 body{display:flex;align-items:center;justify-content:center}
 .display{
   width:100vw;
-  height:100vh;
+  aspect-ratio:33.12/4.36;
+  height:auto;
+  max-height:100vh;
   min-width:0;
   min-height:0;
   display:grid;
@@ -235,6 +237,50 @@ function destinationSpeech(code){
   }[code] || ("tujuan " + code);
 }
 
+
+let audioContext = null;
+
+function announcementChime(){
+  if(!suaraAktif) return;
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return;
+
+    if(!audioContext) audioContext = new AC();
+    if(audioContext.state === "suspended") audioContext.resume();
+
+    const now = audioContext.currentTime;
+
+    // Announcement chime: short "ding-tong" with a soft third note.
+    // This is intentionally brief so the spoken announcement follows quickly.
+    const notes = [
+      {freq: 880,  start: 0.00, duration: 0.34, volume: 0.20},
+      {freq: 659.25,start: 0.18, duration: 0.42, volume: 0.18},
+      {freq: 783.99,start: 0.42, duration: 0.28, volume: 0.12}
+    ];
+
+    notes.forEach(n => {
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(n.freq, now + n.start);
+
+      gain.gain.setValueAtTime(0.0001, now + n.start);
+      gain.gain.exponentialRampToValueAtTime(n.volume, now + n.start + 0.025);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + n.start + n.duration);
+
+      osc.connect(gain);
+      gain.connect(audioContext.destination);
+
+      osc.start(now + n.start);
+      osc.stop(now + n.start + n.duration + 0.02);
+    });
+  }catch(e){
+    console.warn("Announcement chime:", e);
+  }
+}
+
 function speak(code, data){
   if(!suaraAktif || !data || !window.speechSynthesis) return;
   const callKey = String(data.call_id || "") + "|" + String(data.queue_id || "");
@@ -242,18 +288,23 @@ function speak(code, data){
   speakingKey = callKey;
 
   window.speechSynthesis.cancel();
+  announcementChime();
+
   const nomor = String(data.queue_code || "").replace("-", " ");
   const nama = data.customer_name || "";
   const tujuan = destinationSpeech(code);
-  const u = new SpeechSynthesisUtterance(
-    "Nomor antrean " + nomor + ", atas nama " + nama + ", silakan menuju " + tujuan + "."
-  );
-  u.lang = "id-ID";
-  u.rate = .82;
-  u.pitch = 1;
-  u.volume = 1;
-  u.onend = () => { speakingKey = null; };
-  window.speechSynthesis.speak(u);
+
+  setTimeout(() => {
+    const u = new SpeechSynthesisUtterance(
+      "Nomor antrean " + nomor + ", atas nama " + nama + ", silakan menuju " + tujuan + "."
+    );
+    u.lang = "id-ID";
+    u.rate = .82;
+    u.pitch = 1;
+    u.volume = 1;
+    u.onend = () => { speakingKey = null; };
+    window.speechSynthesis.speak(u);
+  }, 350);
 }
 
 async function loadCounter(code){
@@ -287,11 +338,14 @@ document.getElementById("soundButton").addEventListener("click", () => {
   button.textContent = "🔊 SUARA AKTIF";
   button.style.background = "#2bb673";
   button.style.color = "#fff";
-  const test = new SpeechSynthesisUtterance("Suara antrean aktif.");
-  test.lang = "id-ID";
-  test.rate = .85;
   window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(test);
+  announcementChime();
+  setTimeout(() => {
+    const test = new SpeechSynthesisUtterance("Suara antrean aktif.");
+    test.lang = "id-ID";
+    test.rate = .85;
+    window.speechSynthesis.speak(test);
+  }, 350);
 });
 
 function clock(){
