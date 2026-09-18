@@ -171,34 +171,30 @@ async function loadCounterIds(){
 
 async function loadWaitingCount(){
   try{
-    if(!counterIds[activeCounter]) await loadCounterIds();
-    const cid=counterIds[activeCounter];
-    if(!cid) return;
+    const raw = await rpc("get_jumlah_antrean_menunggu", {
+      p_counter_code: activeCounter
+    });
 
-    const r=await fetch(
-      SUPABASE_URL+"/rest/v1/queues?select=id&queue_date=eq."+new Date().toISOString().slice(0,10)+"&status=eq.waiting&counter_id=eq."+encodeURIComponent(cid),
-      {headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY,Accept:"application/json"}}
-    );
-    if(!r.ok) throw new Error("HTTP "+r.status);
-    const rows=await r.json();
-    const count=Array.isArray(rows)?rows.length:0;
+    const result = typeof raw === "string" ? JSON.parse(raw) : raw;
+    const count = Number(result?.jumlah_menunggu ?? 0);
 
-    waitingCount.textContent=count;
-    waitingAlert.classList.toggle("has-waiting",count>0);
+    waitingCount.textContent = count;
+    waitingAlert.classList.toggle("has-waiting", count > 0);
 
-    if(count>0){
-      waitingTitle.textContent="ADA ANTREAN MENUNGGU";
-      waitingText.textContent=count===1
-        ? "1 warga sedang menunggu untuk "+(destinationData[activeCounter]?.title||"tujuan ini")+"."
-        : count+" warga sedang menunggu untuk "+(destinationData[activeCounter]?.title||"tujuan ini")+".";
+    if(count > 0){
+      waitingTitle.textContent = "🔔 ADA ANTREAN MENUNGGU";
+      waitingText.textContent = count === 1
+        ? "1 warga sedang menunggu untuk " + (destinationData[activeCounter]?.title || "tujuan ini") + "."
+        : count + " warga sedang menunggu untuk " + (destinationData[activeCounter]?.title || "tujuan ini") + ".";
     }else{
-      waitingTitle.textContent="TIDAK ADA ANTREAN MENUNGGU";
-      waitingText.textContent="Belum ada warga yang menunggu di "+(destinationData[activeCounter]?.title||"tujuan ini")+".";
+      waitingTitle.textContent = "TIDAK ADA ANTREAN MENUNGGU";
+      waitingText.textContent = "Belum ada warga yang menunggu di " + (destinationData[activeCounter]?.title || "tujuan ini") + ".";
     }
   }catch(e){
-    console.error("Gagal memuat jumlah antrean menunggu:",e);
-    waitingTitle.textContent="STATUS ANTREAN";
-    waitingText.textContent="Jumlah antrean sedang diperbarui...";
+    console.error("Gagal memuat jumlah antrean menunggu:", e);
+    waitingCount.textContent = "—";
+    waitingTitle.textContent = "STATUS ANTREAN";
+    waitingText.textContent = "Belum dapat memuat jumlah antrean.";
   }
 }
 
