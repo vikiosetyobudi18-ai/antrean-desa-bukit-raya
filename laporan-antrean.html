@@ -2,106 +2,168 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Laporan Antrean - Desa Bukit Raya</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f7fb;color:#172033}.wrap{max-width:1400px;margin:auto;padding:24px}.hidden{display:none!important}.card{background:#fff;border:1px solid #e3e9f2;border-radius:18px;box-shadow:0 8px 25px rgba(22,43,77,.07)}.head{background:#1459a6;color:#fff;border-radius:18px;padding:24px;margin-bottom:18px;display:flex;justify-content:space-between;gap:15px;align-items:center}.head h1{margin:0 0 5px}.head p{margin:0}.btn{border:0;border-radius:10px;padding:12px 17px;font-weight:800;cursor:pointer}.primary{background:#ffc400;color:#123b72}.light{background:#fff;color:#123b72}.danger{background:#c62828;color:#fff}.filters{padding:18px;margin-bottom:18px}.row{display:flex;gap:12px;align-items:end;flex-wrap:wrap}.field{flex:1;min-width:210px}.field label{display:block;font-weight:700;margin-bottom:7px}input{width:100%;padding:12px;border:1px solid #ccd5e2;border-radius:10px}.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}.stat{padding:18px}.stat small{color:#667085}.num{font-size:28px;font-weight:800;color:#1459a6;margin-top:5px}.counters{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.counter{padding:18px}.counter h3{margin:0 0 8px;color:#1459a6}.tablecard{padding:18px}.tabletop{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}.tabletop h2{margin:0;color:#123b72}.search{max-width:360px}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:1000px}th,td{padding:10px;border-bottom:1px solid #e7ebf0;text-align:left;font-size:14px}th{background:#f8fafc;white-space:nowrap}.badge{display:inline-block;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:700}.waiting{background:#fff7d6;color:#8a6200}.called,.serving{background:#e8f1ff;color:#175cd3}.completed{background:#ecfdf3;color:#027a48}.skipped{background:#fef3f2;color:#b42318}.msg{padding:12px;border-radius:10px;margin-top:12px;font-size:14px}.ok{background:#ecfdf3;color:#027a48}.err{background:#fef3f2;color:#b42318}.empty{text-align:center;padding:35px;color:#667085}@media(max-width:900px){.summary{grid-template-columns:repeat(2,1fr)}.counters{grid-template-columns:repeat(2,1fr)}.head{flex-direction:column;align-items:flex-start}}@media(max-width:520px){.wrap{padding:14px}.summary,.counters{grid-template-columns:1fr}.head h1{font-size:24px}}
+*{box-sizing:border-box}
+body{margin:0;background:#f4f7fb;font-family:Arial,Helvetica,sans-serif;color:#17324d}
+.wrap{max-width:1400px;margin:0 auto;padding:24px}
+.header{background:#0b2b50;color:#fff;border-radius:16px;padding:22px 26px;margin-bottom:18px}
+.header h1{margin:0;font-size:28px}.header p{margin:6px 0 0;opacity:.8}
+.filters,.summary,.panel{background:#fff;border-radius:16px;padding:18px;margin-bottom:18px;box-shadow:0 4px 18px rgba(11,43,80,.07)}
+.filters{display:flex;gap:12px;align-items:end;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:12px;font-weight:700;color:#60758a}
+input,select,button{height:42px;border:1px solid #d5dee8;border-radius:10px;padding:0 12px;font-size:14px}
+button{cursor:pointer;font-weight:700}.primary{background:#0b2b50;color:#fff;border-color:#0b2b50}.secondary{background:#fff}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.stat{border:1px solid #e1e8ef;border-radius:12px;padding:14px}.stat small{display:block;color:#718398;font-weight:700}.stat strong{display:block;font-size:28px;margin-top:5px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.panel h2{font-size:18px;margin:0 0 14px}.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 9px;border-bottom:1px solid #e8edf2;text-align:left;vertical-align:top}th{background:#f7f9fb;font-size:12px;white-space:nowrap}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#eef3f8}
+.empty{text-align:center;padding:28px;color:#8291a1}
+.note{font-size:12px;color:#718398;margin-top:8px}
+@media(max-width:900px){.summary{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+@media print{body{background:#fff}.wrap{max-width:none;padding:0}.filters,.actions{display:none}.header,.summary,.panel{box-shadow:none;border:1px solid #ddd}.panel{break-inside:avoid}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="head">
-    <div><h1>Laporan Antrean</h1><p>Rekap dan riwayat pelayanan Desa Bukit Raya</p></div>
-    <div><button id="logout" class="btn danger">KELUAR</button></div>
+  <div class="header">
+    <h1>Laporan Antrean Pelayanan</h1>
+    <p>Desa Bukit Raya</p>
   </div>
 
-  <div class="card filters">
-    <div class="row">
-      <div class="field"><label for="date">Tanggal</label><input id="date" type="date"></div>
-      <button id="load" class="btn primary">MUAT DATA</button>
-      <button id="export" class="btn light">EXPORT CSV</button>
+  <div class="filters">
+    <div class="field">
+      <label>TANGGAL MULAI</label>
+      <input type="date" id="startDate">
     </div>
-    <div id="msg" class="msg hidden"></div>
-  </div>
-
-  <div class="summary">
-    <div class="card stat"><small>TOTAL ANTREAN</small><div id="total" class="num">0</div></div>
-    <div class="card stat"><small>MENUNGGU</small><div id="waiting" class="num">0</div></div>
-    <div class="card stat"><small>DIPANGGIL / DILAYANI</small><div id="active" class="num">0</div></div>
-    <div class="card stat"><small>SELESAI</small><div id="completed" class="num">0</div></div>
-    <div class="card stat"><small>DILEWATI</small><div id="skipped" class="num">0</div></div>
-  </div>
-
-  <div id="counters" class="counters"></div>
-
-  <div class="card tablecard">
-    <div class="tabletop">
-      <h2>Detail Antrean</h2>
-      <input id="search" class="search" type="text" placeholder="Cari nama, nomor, atau pelayanan...">
+    <div class="field">
+      <label>TANGGAL SELESAI</label>
+      <input type="date" id="endDate">
     </div>
-    <div id="table"></div>
+    <div class="actions">
+      <button class="primary" onclick="loadReport()">Tampilkan Laporan</button>
+      <button class="secondary" onclick="exportCSV()">Export CSV</button>
+      <button class="secondary" onclick="window.print()">Cetak</button>
+    </div>
+  </div>
+
+  <div class="summary" id="summary">
+    <div class="stat"><small>TOTAL ANTREAN</small><strong>0</strong></div>
+    <div class="stat"><small>SELESAI</small><strong>0</strong></div>
+    <div class="stat"><small>MENUNGGU</small><strong>0</strong></div>
+    <div class="stat"><small>SEDANG DIPROSES</small><strong>0</strong></div>
+    <div class="stat"><small>DILEWATI</small><strong>0</strong></div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h2>Rekap per Loket</h2>
+      <div class="table-wrap"><table id="counterTable"><thead><tr><th>Loket</th><th>Petugas</th><th>Total</th><th>Selesai</th><th>Menunggu</th><th>Diproses</th><th>Dilewati</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="panel">
+      <h2>Rekap Jenis Pelayanan</h2>
+      <div class="table-wrap"><table id="serviceTable"><thead><tr><th>Pelayanan</th><th>Loket</th><th>Jumlah</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Detail Antrean</h2>
+    <div class="note" id="periodNote"></div>
+    <div class="table-wrap">
+      <table id="detailTable">
+        <thead><tr><th>Tanggal</th><th>Nomor</th><th>Nama Warga</th><th>Jenis Pelayanan</th><th>Loket</th><th>Status</th><th>Maksud Audiensi</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL="https://pyawggjlbrvneflpsalj.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY="sb_publishable_5SdvMobBB2AvtXcJd_Scxw_rVsoqM8R";
-const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
-let rows=[];
+const SUPABASE_KEY="sb_publishable_5SdvMobBB2AvtXcJd_Scxw_rVsoqM8R";
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-const $=id=>document.getElementById(id);
-function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
-function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
-function dt(v){if(!v)return "-";const d=new Date(v);return isNaN(d)?"-":d.toLocaleString("id-ID",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})}
-function msg(t,ok){$("msg").textContent=t;$("msg").className="msg "+(ok?"ok":"err")}
-function badge(s){const m={waiting:"Menunggu",called:"Dipanggil",serving:"Dilayani",completed:"Selesai",skipped:"Dilewati"};return `<span class="badge ${s}">${m[s]||s||"-"}</span>`}
+let reportRows=[];
 
-function render(){
-  $("total").textContent=rows.length;
-  $("waiting").textContent=rows.filter(x=>x.status==="waiting").length;
-  $("active").textContent=rows.filter(x=>["called","serving"].includes(x.status)).length;
-  $("completed").textContent=rows.filter(x=>x.status==="completed").length;
-  $("skipped").textContent=rows.filter(x=>x.status==="skipped").length;
+function today(){
+  const d=new Date(), z=n=>String(n).padStart(2,"0");
+  return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate());
+}
+document.getElementById("startDate").value=today();
+document.getElementById("endDate").value=today();
 
-  const names={A:"Loket A",B:"Loket B",C:"Loket C",D:"Loket D"};
-  $("counters").innerHTML=["A","B","C","D"].map(c=>{
-    const r=rows.filter(x=>x.counter_code===c);
-    return `<div class="card counter"><h3>${names[c]}</h3><div>Total: <b>${r.length}</b></div><div>Selesai: <b>${r.filter(x=>x.status==="completed").length}</b></div><div>Aktif: <b>${r.filter(x=>["called","serving"].includes(x.status)).length}</b></div></div>`;
-  }).join("");
-  renderTable();
+function esc(v){
+  return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+}
+function statusLabel(s){
+  return ({waiting:"Menunggu",called:"Dipanggil",serving:"Sedang dilayani",completed:"Selesai",skipped:"Dilewati"})[s]||s||"-";
+}
+function statusCount(rows,s){return rows.filter(r=>r.status===s).length}
+
+async function loadReport(){
+  const start=document.getElementById("startDate").value;
+  const end=document.getElementById("endDate").value;
+  if(!start||!end){alert("Tanggal laporan wajib diisi.");return}
+  if(start>end){alert("Tanggal mulai tidak boleh lebih besar dari tanggal selesai.");return}
+
+  const {data,error}=await db.rpc("get_laporan_antrean",{p_start_date:start,p_end_date:end});
+  if(error){alert("Laporan gagal dimuat: "+error.message);return}
+  reportRows=data||[];
+  renderReport(start,end);
 }
 
-function renderTable(){
-  const q=$("search").value.trim().toLowerCase();
-  const r=rows.filter(x=>!q||[x.queue_code,x.customer_name,x.service_name,x.counter_code,x.counter_name,x.status].some(v=>String(v??"").toLowerCase().includes(q)));
-  if(!r.length){$("table").innerHTML='<div class="empty">Tidak ada data antrean untuk ditampilkan.</div>';return}
-  $("table").innerHTML=`<div class="tablewrap"><table><thead><tr><th>No.</th><th>Nomor</th><th>Nama Pemohon</th><th>Pelayanan</th><th>Loket</th><th>Status</th><th>Daftar</th><th>Dipanggil</th><th>Mulai Dilayani</th><th>Selesai</th></tr></thead><tbody>${r.map((x,i)=>`<tr><td>${i+1}</td><td><b>${esc(x.queue_code)}</b></td><td>${esc(x.customer_name)}</td><td>${esc(x.service_name)}</td><td>${esc(x.counter_code)} — ${esc(x.counter_name)}</td><td>${badge(x.status)}</td><td>${dt(x.created_at)}</td><td>${dt(x.called_at)}</td><td>${dt(x.served_at)}</td><td>${dt(x.completed_at)}</td></tr>`).join("")}</tbody></table></div>`;
+function renderReport(start,end){
+  const total=reportRows.length;
+  document.getElementById("summary").innerHTML=[
+    ["TOTAL ANTREAN",total],
+    ["SELESAI",statusCount(reportRows,"completed")],
+    ["MENUNGGU",statusCount(reportRows,"waiting")],
+    ["SEDANG DIPROSES",statusCount(reportRows,"called")+statusCount(reportRows,"serving")],
+    ["DILEWATI",statusCount(reportRows,"skipped")]
+  ].map(x=>`<div class="stat"><small>${x[0]}</small><strong>${x[1]}</strong></div>`).join("");
+
+  const counters={};
+  reportRows.forEach(r=>{
+    const k=r.counter_code||"-";
+    if(!counters[k]) counters[k]={name:r.counter_name||k,staff:r.staff_name||"-",rows:[]};
+    counters[k].rows.push(r);
+  });
+  document.querySelector("#counterTable tbody").innerHTML=Object.entries(counters).map(([code,x])=>{
+    const a=x.rows;
+    return `<tr><td><b>${esc(code)}</b> — ${esc(x.name)}</td><td>${esc(x.staff)}</td><td>${a.length}</td><td>${statusCount(a,"completed")}</td><td>${statusCount(a,"waiting")}</td><td>${statusCount(a,"called")+statusCount(a,"serving")}</td><td>${statusCount(a,"skipped")}</td></tr>`;
+  }).join("")||`<tr><td colspan="7" class="empty">Tidak ada data.</td></tr>`;
+
+  const services={};
+  reportRows.forEach(r=>{
+    const k=r.service_name||"-";
+    if(!services[k]) services[k]={counter:r.counter_code||"-",n:0};
+    services[k].n++;
+  });
+  document.querySelector("#serviceTable tbody").innerHTML=Object.entries(services).sort((a,b)=>b[1].n-a[1].n).map(([name,x])=>
+    `<tr><td>${esc(name)}</td><td>${esc(x.counter)}</td><td><b>${x.n}</b></td></tr>`
+  ).join("")||`<tr><td colspan="3" class="empty">Tidak ada data.</td></tr>`;
+
+  document.querySelector("#detailTable tbody").innerHTML=reportRows.map(r=>
+    `<tr><td>${esc(r.queue_date)}</td><td><b>${esc(r.queue_code)}</b></td><td>${esc(r.customer_name)}</td><td>${esc(r.service_name)}</td><td>${esc(r.counter_code)} — ${esc(r.counter_name)}</td><td><span class="badge">${esc(statusLabel(r.status))}</span></td><td>${esc(r.maksud_audiensi||"-")}</td></tr>`
+  ).join("")||`<tr><td colspan="7" class="empty">Tidak ada data pada periode ini.</td></tr>`;
+
+  document.getElementById("periodNote").textContent=`Periode laporan: ${start} s.d. ${end} • ${total} antrean`;
 }
 
-async function load(){
-  const {data,error}=await db.rpc("laporan_antrean",{p_queue_date:$("date").value});
-  if(error){msg(error.message||"Gagal memuat laporan.",false);return}
-  rows=data||[];render();msg("Data laporan berhasil dimuat.",true);
+function exportCSV(){
+  if(!reportRows.length){alert("Tampilkan laporan terlebih dahulu.");return}
+  const headers=["Tanggal","Nomor Antrean","Nama Warga","Jenis Pelayanan","Loket","Nama Loket","Status","Maksud Audiensi"];
+  const rows=reportRows.map(r=>[r.queue_date,r.queue_code,r.customer_name,r.service_name,r.counter_code,r.counter_name,statusLabel(r.status),r.maksud_audiensi||""]);
+  const csv=[headers,...rows].map(row=>row.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");
+  const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="laporan-antrean-"+document.getElementById("startDate").value+"-"+document.getElementById("endDate").value+".csv";a.click();URL.revokeObjectURL(a.href);
 }
-
-function csv(){
-  if(!rows.length){msg("Tidak ada data untuk diekspor.",false);return}
-  const h=["No","Nomor Antrean","Nama Pemohon","Pelayanan","Loket","Nama Loket","Status","Daftar","Dipanggil","Mulai Dilayani","Selesai"];
-  const d=rows.map((x,i)=>[i+1,x.queue_code,x.customer_name,x.service_name,x.counter_code,x.counter_name,x.status,x.created_at,x.called_at,x.served_at,x.completed_at]);
-  const out=[h,...d].map(r=>r.map(v=>`"${String(v??"").replaceAll('"','""')}"`).join(",")).join("\n");
-  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\uFEFF"+out],{type:"text/csv;charset=utf-8"}));a.download="laporan-antrean-"+$("date").value+".csv";a.click();
-}
-
-async function start(){
-  const {data}=await db.auth.getSession();
-  if(!data||!data.session){window.location.replace("laporan-login.html");return}
-  $("date").value=today();
-  await load();
-}
-$("load").onclick=load;$("export").onclick=csv;$("search").oninput=renderTable;
-$("logout").onclick=async()=>{await db.auth.signOut();window.location.replace("laporan-login.html")};
-start();
+loadReport();
 </script>
 </body>
 </html>
