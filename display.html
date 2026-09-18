@@ -3,1165 +3,308 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Display Antrean - Desa Bukit Raya</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
-
-* {
-    box-sizing: border-box;
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#081d36;font-family:Arial,Helvetica,sans-serif}
+body{display:flex;align-items:center;justify-content:center}
+.display{
+  width:100vw;
+  height:100vh;
+  min-width:0;
+  min-height:0;
+  display:grid;
+  grid-template-columns:310px repeat(7,minmax(0,1fr));
+  gap:7px;
+  padding:7px;
+  background:#081d36;
 }
-
-html,
-body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: transparent;
-    font-family: Arial, Helvetica, sans-serif;
+.brand{
+  border-radius:10px;
+  padding:20px 18px;
+  background:#0b2b50;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  overflow:hidden;
 }
-
-body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.brand .small{font-size:14px;font-weight:700;letter-spacing:1.8px;color:#d8e9f7;margin-bottom:7px}
+.brand h1{margin:0;color:#fff;font-size:31px;line-height:1.05;letter-spacing:.3px}
+.brand .village{margin-top:13px;display:inline-block;align-self:flex-start;padding:8px 11px;border-radius:7px;background:#f6c400;color:#09223f;font-size:15px;font-weight:800;letter-spacing:.5px}
+.card{
+  border-radius:10px;
+  background:#f7fafc;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  overflow:hidden;
+  min-width:0;
+  position:relative;
 }
-
-/* =========================================================
-   AREA UTAMA
-   Rasio 33,12 : 4,36 = 7,596 : 1
-========================================================= */
-
-.display {
-    width: 100vw;
-    aspect-ratio: 7.596 / 1;
-    max-height: 100vh;
-
-    display: grid;
-    grid-template-columns: 16% repeat(4, 18%) 12%;
-
-    background:
-        linear-gradient(
-            135deg,
-            #ffffff 0%,
-            #f7fbff 55%,
-            #eef7ff 100%
-        );
-
-    border-top: 4px solid #075ca8;
-    border-bottom: 6px solid #075ca8;
-
-    box-shadow:
-        0 5px 18px rgba(0,0,0,.20);
-
-    overflow: hidden;
+.card .code{
+  font-size:16px;
+  font-weight:800;
+  color:#176ca8;
+  letter-spacing:.5px;
+  margin-bottom:2px;
+  white-space:nowrap;
 }
-
-/* =========================================================
-   PANEL KIRI
-========================================================= */
-
-.brand {
-    position: relative;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    color: white;
-
-    background:
-        linear-gradient(
-            135deg,
-            #064d91 0%,
-            #086cc0 55%,
-            #008ee8 100%
-        );
-
-    padding: 5px;
+.card .person{
+  font-size:11px;
+  color:#6b7280;
+  margin-bottom:7px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:95%;
 }
-
-.brand::after {
-    content: "";
-
-    position: absolute;
-
-    right: -18px;
-    top: 0;
-
-    width: 38px;
-    height: 100%;
-
-    background: #ffffff;
-
-    clip-path: polygon(
-        0 0,
-        50% 0,
-        100% 50%,
-        50% 100%,
-        0 100%,
-        45% 50%
-    );
-
-    z-index: 3;
+.card .number{
+  font-size:42px;
+  line-height:.95;
+  font-weight:900;
+  color:#0c6cae;
+  white-space:nowrap;
 }
-
-.people-icon {
-    font-size: clamp(24px, 3vw, 58px);
-    line-height: 1;
-    margin-bottom: 3px;
+.card .name{
+  margin-top:6px;
+  font-size:14px;
+  line-height:1.15;
+  font-weight:800;
+  color:#182b3f;
+  max-width:94%;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
-
-.brand-title {
-    font-size: clamp(15px, 1.75vw, 34px);
-    font-weight: 900;
-    line-height: .95;
-    text-align: center;
-    letter-spacing: -.5px;
+.card .empty{
+  font-size:30px;
+  line-height:1;
+  font-weight:900;
+  color:#9aa7b3;
 }
-
-.brand-name {
-    margin-top: 7px;
-
-    background: #ffd900;
-    color: #111;
-
-    padding: 4px 12px;
-
-    border-radius: 5px;
-
-    font-size: clamp(10px, 1.1vw, 22px);
-    font-weight: 900;
-
-    white-space: nowrap;
+.card .waiting{
+  margin-top:5px;
+  font-size:10px;
+  color:#8a97a3;
+  text-transform:uppercase;
+  letter-spacing:.6px;
 }
-
-/* =========================================================
-   KARTU LOKET
-========================================================= */
-
-.counter {
-    position: relative;
-
-    display: flex;
-    flex-direction: column;
-
-    justify-content: space-between;
-
-    padding: 9px 12px 8px;
-
-    border-right: 2px solid #1683d3;
-
-    background: rgba(255,255,255,.94);
-
-    min-width: 0;
+.card.audiensi{background:#f7f4fb}
+.card.audiensi .code{color:#68459f}
+.card.audiensi .number{color:#68459f}
+.card.active{box-shadow:inset 0 0 0 3px #f6c400}
+.card.flash{animation:flash .8s ease}
+@keyframes flash{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
+#soundButton{
+  position:fixed;right:8px;bottom:8px;z-index:10;
+  border:0;border-radius:8px;padding:8px 11px;
+  background:#f6c400;color:#09223f;font-weight:800;font-size:12px;cursor:pointer;
 }
-
-.counter:last-of-type {
-    border-right: none;
+#clock{
+  position:fixed;left:8px;bottom:8px;z-index:10;
+  color:#d9e8f4;font-size:11px;background:rgba(0,0,0,.2);
+  padding:5px 8px;border-radius:6px
 }
-
-/* label loket */
-
-.counter-header {
-    width: 78%;
-
-    margin: 0 auto;
-
-    padding: 5px 4px;
-
-    border-radius: 10px;
-
-    color: white;
-
-    text-align: center;
-
-    font-size: clamp(12px, 1.45vw, 28px);
-    font-weight: 900;
-
-    line-height: 1;
-
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.35),
-        0 2px 5px rgba(0,0,0,.15);
+@media(max-width:1200px){
+ .display{grid-template-columns:220px repeat(7,minmax(0,1fr));gap:4px;padding:4px}
+ .brand{padding:12px 10px} .brand h1{font-size:22px} .brand .small{font-size:10px}
+ .brand .village{font-size:11px;margin-top:8px;padding:6px 7px}
+ .card .code{font-size:11px} .card .person{font-size:8px;margin-bottom:4px}
+ .card .number{font-size:27px} .card .name{font-size:10px} .card .empty{font-size:22px}
 }
-
-/* warna tiap loket */
-
-.counter-a .counter-header {
-    background: linear-gradient(180deg,#2d8be0,#0965b8);
+@media(max-width:850px){
+ .display{grid-template-columns:140px repeat(7,minmax(0,1fr))}
+ .brand h1{font-size:16px} .brand .small{font-size:8px;letter-spacing:1px}
+ .brand .village{font-size:8px}
+ .card .code{font-size:8px} .card .person{font-size:6px}
+ .card .number{font-size:19px} .card .name{font-size:7px} .card .empty{font-size:16px}
 }
-
-.counter-b .counter-header {
-    background: linear-gradient(180deg,#18bd69,#00934d);
-}
-
-.counter-c .counter-header {
-    background: linear-gradient(180deg,#ff9a20,#f46c00);
-}
-
-.counter-d .counter-header {
-    background: linear-gradient(180deg,#8b4be1,#5921ae);
-}
-
-/* nomor */
-
-.queue-number {
-    text-align: center;
-
-    font-size: clamp(24px, 3.2vw, 64px);
-
-    font-weight: 900;
-
-    line-height: .9;
-
-    letter-spacing: -1.5px;
-
-    color: #111;
-
-    white-space: nowrap;
-}
-
-/* nama */
-
-.customer {
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 7px;
-
-    min-width: 0;
-}
-
-.customer-icon {
-    flex: 0 0 auto;
-
-    width: clamp(18px, 1.6vw, 32px);
-    height: clamp(18px, 1.6vw, 32px);
-
-    border-radius: 50%;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: white;
-
-    font-size: clamp(9px, .8vw, 16px);
-}
-
-.counter-a .customer-icon {
-    background: #0874cf;
-}
-
-.counter-b .customer-icon {
-    background: #08a85a;
-}
-
-.counter-c .customer-icon {
-    background: #f47700;
-}
-
-.counter-d .customer-icon {
-    background: #6529b9;
-}
-
-.customer-name {
-    font-size: clamp(10px, 1.15vw, 23px);
-
-    font-weight: 900;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-    color: #111;
-}
-
-/* jumlah menunggu */
-
-.waiting {
-    align-self: center;
-
-    width: 78%;
-
-    padding: 5px 7px;
-
-    border-radius: 12px;
-
-    text-align: center;
-
-    font-size: clamp(9px, 1vw, 20px);
-
-    font-weight: 900;
-
-    white-space: nowrap;
-}
-
-.counter-a .waiting {
-    color: #0867b7;
-    background: #ddecfa;
-}
-
-.counter-b .waiting {
-    color: #078c4c;
-    background: #dcf7e9;
-}
-
-.counter-c .waiting {
-    color: #e96300;
-    background: #fff0e4;
-}
-
-.counter-d .waiting {
-    color: #6124b1;
-    background: #eee4fb;
-}
-
-/* =========================================================
-   PANEL KANAN
-========================================================= */
-
-.graphic {
-    position: relative;
-
-    overflow: hidden;
-
-    background:
-        linear-gradient(
-            135deg,
-            #ffffff 0%,
-            #eef7ff 50%,
-            #dcefff 100%
-        );
-}
-
-/* bentuk geometris */
-
-.graphic::before {
-    content: "";
-
-    position: absolute;
-
-    width: 85%;
-    height: 170%;
-
-    right: -25%;
-    top: -35%;
-
-    background:
-        linear-gradient(
-            135deg,
-            transparent 30%,
-            rgba(0,128,220,.12) 31%,
-            rgba(0,128,220,.12) 55%,
-            transparent 56%
-        );
-
-    transform: rotate(8deg);
-}
-
-.graphic::after {
-    content: "";
-
-    position: absolute;
-
-    width: 45px;
-    height: 45px;
-
-    right: 25%;
-    top: 25%;
-
-    background: #ffd52b;
-
-    transform: rotate(45deg);
-
-    border-radius: 5px;
-
-    box-shadow:
-        0 0 0 7px rgba(255,213,43,.12);
-}
-
-/* garis dekorasi */
-
-.graphic-line {
-    position: absolute;
-
-    width: 90px;
-    height: 8px;
-
-    right: 7%;
-    bottom: 20%;
-
-    background: #087bd0;
-
-    transform: rotate(-45deg);
-
-    border-radius: 5px;
-}
-
-.graphic-line.two {
-    width: 55px;
-
-    right: 16%;
-    bottom: 38%;
-
-    background: #ffd52b;
-}
-
-/* =========================================================
-   STATUS PANGGILAN
-========================================================= */
-
-.counter.active {
-    animation: pulseCounter 1.2s ease-in-out infinite;
-    z-index: 5;
-}
-
-.counter.active::before {
-    content: "DIPANGGIL";
-
-    position: absolute;
-
-    top: 4px;
-    right: 4px;
-
-    background: #ffcf00;
-    color: #111;
-
-    padding: 3px 7px;
-
-    border-radius: 5px;
-
-    font-size: clamp(7px,.7vw,14px);
-
-    font-weight: 900;
-
-    z-index: 10;
-}
-
-@keyframes pulseCounter {
-
-    0% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.025);
-        box-shadow: 0 0 25px rgba(255,193,7,.8);
-    }
-
-    100% {
-        transform: scale(1);
-    }
-
-}
-
-/* =========================================================
-   KETIKA BELUM ADA ANTREAN
-========================================================= */
-
-.empty {
-    color: #a1a1a1;
-
-    font-size: clamp(10px,1vw,20px);
-
-    font-weight: 700;
-
-    text-align: center;
-
-    margin: auto;
-}
-
-/* =========================================================
-   TOMBOL SUARA
-========================================================= */
-
-.voice-button {
-
-    position: fixed;
-
-    right: 15px;
-    bottom: 15px;
-
-    border: none;
-
-    background: #075ca8;
-
-    color: white;
-
-    padding: 8px 15px;
-
-    border-radius: 20px;
-
-    font-size: 13px;
-
-    font-weight: bold;
-
-    cursor: pointer;
-
-    box-shadow: 0 3px 10px rgba(0,0,0,.25);
-
-    z-index: 100;
-
-}
-
-.voice-button.enabled {
-    background: #08a85a;
-}
-
-/* sembunyikan tombol ketika fullscreen */
-
-body.fullscreen .voice-button {
-    display: none;
-}
-
 </style>
 </head>
-
 <body>
-
 <div class="display">
+  <section class="brand">
+    <div class="small">PEMERINTAH DESA</div>
+    <h1>ANTREAN<br>PELAYANAN</h1>
+    <div class="village">DESA BUKIT RAYA</div>
+  </section>
 
-    <!-- =====================================================
-         BRAND
-    ====================================================== -->
-
-    <div class="brand">
-
-        <div class="people-icon">👥</div>
-
-        <div class="brand-title">
-            ANTREAN<br>
-            PELAYANAN
-        </div>
-
-        <div class="brand-name">
-            DESA BUKIT RAYA
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         LOKET A
-    ====================================================== -->
-
-    <div class="counter counter-a" id="counter-A">
-
-        <div class="counter-header">
-            LOKET A
-        </div>
-
-        <div class="queue-number" id="number-A">
-            —
-        </div>
-
-        <div class="customer">
-
-            <div class="customer-icon">
-                👤
-            </div>
-
-            <div class="customer-name" id="name-A">
-                Belum ada antrean
-            </div>
-
-        </div>
-
-        <div class="waiting">
-            MENUNGGU: <span id="waiting-A">0</span>
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         LOKET B
-    ====================================================== -->
-
-    <div class="counter counter-b" id="counter-B">
-
-        <div class="counter-header">
-            LOKET B
-        </div>
-
-        <div class="queue-number" id="number-B">
-            —
-        </div>
-
-        <div class="customer">
-
-            <div class="customer-icon">
-                👤
-            </div>
-
-            <div class="customer-name" id="name-B">
-                Belum ada antrean
-            </div>
-
-        </div>
-
-        <div class="waiting">
-            MENUNGGU: <span id="waiting-B">0</span>
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         LOKET C
-    ====================================================== -->
-
-    <div class="counter counter-c" id="counter-C">
-
-        <div class="counter-header">
-            LOKET C
-        </div>
-
-        <div class="queue-number" id="number-C">
-            —
-        </div>
-
-        <div class="customer">
-
-            <div class="customer-icon">
-                👤
-            </div>
-
-            <div class="customer-name" id="name-C">
-                Belum ada antrean
-            </div>
-
-        </div>
-
-        <div class="waiting">
-            MENUNGGU: <span id="waiting-C">0</span>
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         LOKET D
-    ====================================================== -->
-
-    <div class="counter counter-d" id="counter-D">
-
-        <div class="counter-header">
-            LOKET D
-        </div>
-
-        <div class="queue-number" id="number-D">
-            —
-        </div>
-
-        <div class="customer">
-
-            <div class="customer-icon">
-                👤
-            </div>
-
-            <div class="customer-name" id="name-D">
-                Belum ada antrean
-            </div>
-
-        </div>
-
-        <div class="waiting">
-            MENUNGGU: <span id="waiting-D">0</span>
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         GRAFIS KANAN
-    ====================================================== -->
-
-    <div class="graphic">
-
-        <div class="graphic-line"></div>
-        <div class="graphic-line two"></div>
-
-    </div>
-
+  <section class="card" id="card-A" data-counter="A">
+    <div class="code">LOKET A</div><div class="person">Arman</div>
+    <div class="number" id="number-A">0</div><div class="name" id="name-A">Belum dipanggil</div><div class="waiting" id="status-A">Menunggu</div>
+  </section>
+  <section class="card" id="card-B" data-counter="B">
+    <div class="code">LOKET B</div><div class="person">Vikio</div>
+    <div class="number" id="number-B">0</div><div class="name" id="name-B">Belum dipanggil</div><div class="waiting" id="status-B">Menunggu</div>
+  </section>
+  <section class="card" id="card-C" data-counter="C">
+    <div class="code">LOKET C</div><div class="person">Dilla</div>
+    <div class="number" id="number-C">0</div><div class="name" id="name-C">Belum dipanggil</div><div class="waiting" id="status-C">Menunggu</div>
+  </section>
+  <section class="card" id="card-D" data-counter="D">
+    <div class="code">LOKET D</div><div class="person">Ayu</div>
+    <div class="number" id="number-D">0</div><div class="name" id="name-D">Belum dipanggil</div><div class="waiting" id="status-D">Menunggu</div>
+  </section>
+  <section class="card" id="card-E" data-counter="E">
+    <div class="code">LOKET E</div><div class="person">Nia</div>
+    <div class="number" id="number-E">0</div><div class="name" id="name-E">Belum dipanggil</div><div class="waiting" id="status-E">Menunggu</div>
+  </section>
+  <section class="card audiensi" id="card-K" data-counter="K">
+    <div class="code">KEPALA DESA</div><div class="person">Ruang Audiensi</div>
+    <div class="number" id="number-K">0</div><div class="name" id="name-K">Belum dipanggil</div><div class="waiting" id="status-K">Menunggu</div>
+  </section>
+  <section class="card audiensi" id="card-S" data-counter="S">
+    <div class="code">SEKRETARIS DESA</div><div class="person">Ruang Audiensi</div>
+    <div class="number" id="number-S">0</div><div class="name" id="name-S">Belum dipanggil</div><div class="waiting" id="status-S">Menunggu</div>
+  </section>
 </div>
 
-
-<!-- tombol aktivasi suara -->
-
-<button
-    class="voice-button"
-    id="voiceButton"
-    onclick="aktifkanSuara()"
->
-    🔊 AKTIFKAN SUARA
-</button>
-
+<button id="soundButton">🔊 AKTIFKAN SUARA</button>
+<div id="clock"></div>
 
 <script>
-
-/* =========================================================
-   SUPABASE
-========================================================= */
-
-const SUPABASE_URL =
-    "https://pyawggjlbrvneflpsalj.supabase.co";
-
-const SUPABASE_PUBLISHABLE_KEY =
-    "sb_publishable_5SdvMobBB2AvtXcJd_Scxw_rVsoqM8R";
-
-const db =
-    window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_PUBLISHABLE_KEY
-    );
-
-
-/* =========================================================
-   KONFIGURASI
-========================================================= */
-
-const LOKET = ["A", "B", "C", "D"];
-
-let dataSebelumnya = {
-    A: null,
-    B: null,
-    C: null,
-    D: null
-};
-
-let pertamaKali = true;
-
+const SUPABASE_URL = 'https://pyawggjlbrvneflpsalj.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_5SdvMobBB2AvtXcJd_Scxw_rVsoqM8R';
+const COUNTERS = ["A","B","C","D","E","K","S"];
+const lastState = Object.fromEntries(COUNTERS.map(c => [c, null]));
 let suaraAktif = false;
+let speakingKey = null;
 
-
-/* =========================================================
-   AKTIFKAN SUARA
-========================================================= */
-
-function aktifkanSuara() {
-
-    suaraAktif = true;
-
-    const button =
-        document.getElementById("voiceButton");
-
-    button.innerHTML =
-        "🔊 SUARA AKTIF";
-
-    button.classList.add("enabled");
-
-    const ucapan =
-        new SpeechSynthesisUtterance(
-            "Suara antrean pelayanan Desa Bukit Raya telah aktif."
-        );
-
-    ucapan.lang = "id-ID";
-    ucapan.rate = .9;
-    ucapan.pitch = 1;
-
-    window.speechSynthesis.cancel();
-
-    window.speechSynthesis.speak(ucapan);
-
+function esc(v){
+  return String(v ?? "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 }
 
-
-/* =========================================================
-   UCAPAN ANTREAN
-========================================================= */
-
-function bicaraAntrean(data) {
-
-    if (!suaraAktif) {
-        return;
-    }
-
-    if (!data) {
-        return;
-    }
-
-    const nomor =
-        data.queue_code || "";
-
-    const nama =
-        data.customer_name || "";
-
-    const loket =
-        data.counter_code || "";
-
-    const ucapan =
-        new SpeechSynthesisUtterance(
-            "Nomor antrean " +
-            nomor.replace("-", " ") +
-            ", atas nama " +
-            nama +
-            ", silakan menuju Loket " +
-            loket +
-            "."
-        );
-
-    ucapan.lang = "id-ID";
-
-    ucapan.rate = .82;
-
-    ucapan.pitch = 1;
-
-    ucapan.volume = 1;
-
-    window.speechSynthesis.cancel();
-
-    window.speechSynthesis.speak(ucapan);
-
+async function rpc(name, params){
+  const r = await fetch(SUPABASE_URL + "/rest/v1/rpc/" + name, {
+    method:"POST",
+    headers:{
+      apikey:SUPABASE_KEY,
+      Authorization:"Bearer " + SUPABASE_KEY,
+      "Content-Type":"application/json",
+      Accept:"application/json"
+    },
+    body:JSON.stringify(params)
+  });
+  const text = await r.text();
+  let data;
+  try{ data = text ? JSON.parse(text) : null; }catch{ data = text; }
+  if(!r.ok) throw new Error("HTTP " + r.status + " - " + (typeof data === "string" ? data : JSON.stringify(data)));
+  return data;
 }
 
-
-/* =========================================================
-   AMBIL ANTREAN AKTIF PER LOKET
-========================================================= */
-
-async function ambilAntreanAktif(kode) {
-
-    const {
-        data,
-        error
-    } = await db.rpc(
-        "get_antrean_aktif_loket",
-        {
-            p_counter_code: kode
-        }
-    );
-
-    if (error) {
-
-        console.error(
-            "Gagal mengambil antrean " +
-            kode,
-            error
-        );
-
-        return null;
-    }
-
-    if (!data) {
-        return null;
-    }
-
-    if (
-        typeof data === "object" &&
-        Object.keys(data).length === 0
-    ) {
-        return null;
-    }
-
-    return data;
-
+function normalize(raw){
+  if(!raw) return null;
+  if(typeof raw === "string"){
+    try{ raw = JSON.parse(raw); }catch{ return null; }
+  }
+  if(!raw || !raw.queue_id) return null;
+  return raw;
 }
 
+function updateCard(code, data){
+  const number = document.getElementById("number-" + code);
+  const name = document.getElementById("name-" + code);
+  const status = document.getElementById("status-" + code);
+  const card = document.getElementById("card-" + code);
 
-/* =========================================================
-   TAMPILKAN ANTREAN
-========================================================= */
+  if(!data){
+    number.textContent = "0";
+    name.textContent = "Belum dipanggil";
+    status.textContent = "Menunggu";
+    card.classList.remove("active");
+    return;
+  }
 
-function tampilkanAntrean(kode, data) {
-
-    const number =
-        document.getElementById(
-            "number-" + kode
-        );
-
-    const name =
-        document.getElementById(
-            "name-" + kode
-        );
-
-    const counter =
-        document.getElementById(
-            "counter-" + kode
-        );
-
-
-    if (!data) {
-
-        number.innerText = "—";
-
-        name.innerText =
-            "Belum ada antrean";
-
-        counter.classList.remove(
-            "active"
-        );
-
-        return;
-    }
-
-
-    number.innerText =
-        data.queue_code || "—";
-
-
-    name.innerText =
-        data.customer_name ||
-        "Warga";
-
-
+  number.textContent = data.queue_code || "0";
+  name.textContent = data.customer_name || "";
+  status.textContent = data.status === "serving" ? "Sedang dilayani" : "Dipanggil";
+  card.classList.add("active");
 }
 
-
-/* =========================================================
-   CEK ANTREAN AKTIF
-========================================================= */
-
-async function cekAntreanAktif() {
-
-    for (const kode of LOKET) {
-
-        const data =
-            await ambilAntreanAktif(kode);
-
-
-        tampilkanAntrean(
-            kode,
-            data
-        );
-
-
-        /*
-         * Jangan bicara saat halaman
-         * pertama kali dibuka.
-         */
-
-        if (!pertamaKali) {
-
-            const sebelumnya =
-                dataSebelumnya[kode];
-
-
-            const callSekarang =
-    data?.call_id || null;
-
-const callSebelumnya =
-    sebelumnya?.call_id || null;
-
-if (
-    callSekarang &&
-    callSekarang !== callSebelumnya
-) {
-    
-                const counter =
-                    document.getElementById(
-                        "counter-" + kode
-                    );
-
-                counter.classList.add(
-                    "active"
-                );
-
-
-                setTimeout(
-                    () => {
-
-                        counter.classList.remove(
-                            "active"
-                        );
-
-                    },
-                    7000
-                );
-
-
-                bicaraAntrean(data);
-
-            }
-
-        }
-
-
-        dataSebelumnya[kode] =
-            data;
-
-    }
-
-
-    pertamaKali = false;
-
+function destinationSpeech(code){
+  return {
+    A:"Loket A",
+    B:"Loket B",
+    C:"Loket C",
+    D:"Loket D",
+    E:"Loket E",
+    K:"Ruang Kepala Desa",
+    S:"Ruang Sekretaris Desa"
+  }[code] || ("tujuan " + code);
 }
 
+function speak(code, data){
+  if(!suaraAktif || !data || !window.speechSynthesis) return;
+  const callKey = String(data.call_id || "") + "|" + String(data.queue_id || "");
+  if(callKey === speakingKey) return;
+  speakingKey = callKey;
 
-/* =========================================================
-   JUMLAH ANTREAN MENUNGGU
-========================================================= */
-
-async function cekAntreanMenunggu() {
-
-    const hariIni =
-        new Date()
-        .toLocaleDateString(
-            "en-CA",
-            {
-                timeZone:
-                    "Asia/Makassar"
-            }
-        );
-
-
-    const {
-        data,
-        error
-    } = await db
-        .from("queues")
-        .select(
-            "id,counter_id,status,queue_date"
-        )
-        .eq(
-            "queue_date",
-            hariIni
-        )
-        .eq(
-            "status",
-            "waiting"
-        );
-
-
-    if (error) {
-
-        console.error(
-            "Gagal mengambil jumlah antrean",
-            error
-        );
-
-        return;
-    }
-
-
-    const jumlah = {
-        A: 0,
-        B: 0,
-        C: 0,
-        D: 0
-    };
-
-
-    /*
-     * Berdasarkan data counter:
-     *
-     * 1 = A
-     * 2 = B
-     * 3 = C
-     * 4 = D
-     */
-
-    data.forEach(
-        antrean => {
-
-            const kode =
-                {
-                    1: "A",
-                    2: "B",
-                    3: "C",
-                    4: "D"
-                }[
-                    antrean.counter_id
-                ];
-
-
-            if (kode) {
-                jumlah[kode]++;
-            }
-
-        }
-    );
-
-
-    for (const kode of LOKET) {
-
-        document.getElementById(
-            "waiting-" + kode
-        ).innerText =
-            jumlah[kode];
-
-    }
-
+  window.speechSynthesis.cancel();
+  const nomor = String(data.queue_code || "").replace("-", " ");
+  const nama = data.customer_name || "";
+  const tujuan = destinationSpeech(code);
+  const u = new SpeechSynthesisUtterance(
+    "Nomor antrean " + nomor + ", atas nama " + nama + ", silakan menuju " + tujuan + "."
+  );
+  u.lang = "id-ID";
+  u.rate = .82;
+  u.pitch = 1;
+  u.volume = 1;
+  u.onend = () => { speakingKey = null; };
+  window.speechSynthesis.speak(u);
 }
 
+async function loadCounter(code){
+  try{
+    const raw = await rpc("get_antrean_aktif_loket", {p_counter_code:code});
+    const data = normalize(raw);
+    const previous = lastState[code];
+    updateCard(code, data);
 
-/* =========================================================
-   UPDATE DATA
-========================================================= */
-
-async function updateDisplay() {
-
-    await cekAntreanAktif();
-
-    await cekAntreanMenunggu();
-
+    const newCall = data && (!previous || String(previous.call_id) !== String(data.call_id));
+    if(newCall){
+      const card = document.getElementById("card-" + code);
+      card.classList.remove("flash");
+      void card.offsetWidth;
+      card.classList.add("flash");
+      speak(code, data);
+    }
+    lastState[code] = data;
+  }catch(e){
+    console.error("Display " + code, e);
+  }
 }
 
+async function refresh(){
+  await Promise.all(COUNTERS.map(loadCounter));
+}
 
-/* =========================================================
-   MULAI
-========================================================= */
+document.getElementById("soundButton").addEventListener("click", () => {
+  suaraAktif = true;
+  const button = document.getElementById("soundButton");
+  button.textContent = "🔊 SUARA AKTIF";
+  button.style.background = "#2bb673";
+  button.style.color = "#fff";
+  const test = new SpeechSynthesisUtterance("Suara antrean aktif.");
+  test.lang = "id-ID";
+  test.rate = .85;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(test);
+});
 
-updateDisplay();
-
-
-/*
- * Update setiap 2 detik.
- */
-
-setInterval(
-    updateDisplay,
-    2000
-);
-
-
-/* =========================================================
-   FULLSCREEN
-========================================================= */
-
-document.addEventListener(
-    "dblclick",
-    () => {
-
-        if (
-            !document.fullscreenElement
-        ) {
-
-            document.documentElement
-                .requestFullscreen();
-
-            document.body
-                .classList.add(
-                    "fullscreen"
-                );
-
-        } else {
-
-            document.exitFullscreen();
-
-            document.body
-                .classList.remove(
-                    "fullscreen"
-                );
-
-        }
-
-    }
-);
-
+function clock(){
+  const d = new Date();
+  document.getElementById("clock").textContent =
+    d.toLocaleDateString("id-ID", {day:"2-digit",month:"2-digit",year:"numeric"}) +
+    " • " +
+    d.toLocaleTimeString("id-ID", {hour:"2-digit",minute:"2-digit",second:"2-digit"});
+}
+clock();
+setInterval(clock,1000);
+refresh();
+setInterval(refresh,1000);
 </script>
-
 </body>
 </html>
