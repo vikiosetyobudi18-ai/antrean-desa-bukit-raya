@@ -75,7 +75,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 9px;
     <div class="note" id="periodNote"></div>
     <div class="table-wrap">
       <table id="detailTable">
-        <thead><tr><th>Tanggal</th><th>Nomor</th><th>Nama Warga</th><th>Jenis Pelayanan</th><th>Loket</th><th>Status</th><th>Maksud Audiensi</th></tr></thead>
+        <thead><tr><th>Tanggal</th><th>Nomor</th><th>Nama Warga</th><th>Jenis Pelayanan</th><th>Loket</th><th>Status</th><th>Diambil</th><th>Dipanggil</th><th>Mulai Melayani</th><th>Selesai</th><th>Dilewati</th><th>Maksud Audiensi</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -105,13 +105,20 @@ function statusLabel(s){
 }
 function statusCount(rows,s){return rows.filter(r=>r.status===s).length}
 
+function timeLabel(value){
+  if(!value) return "—";
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleTimeString("id-ID",{timeZone:"Asia/Makassar",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false});
+}
+
 async function loadReport(){
   const start=document.getElementById("startDate").value;
   const end=document.getElementById("endDate").value;
   if(!start||!end){alert("Tanggal laporan wajib diisi.");return}
   if(start>end){alert("Tanggal mulai tidak boleh lebih besar dari tanggal selesai.");return}
 
-  const {data,error}=await db.rpc("get_laporan_antrean",{p_start_date:start,p_end_date:end});
+  const {data,error}=await db.rpc("get_laporan_antrean_v2",{p_start_date:start,p_end_date:end});
   if(error){alert("Laporan gagal dimuat: "+error.message);return}
   reportRows=data||[];
   renderReport(start,end);
@@ -149,16 +156,16 @@ function renderReport(start,end){
   ).join("")||`<tr><td colspan="3" class="empty">Tidak ada data.</td></tr>`;
 
   document.querySelector("#detailTable tbody").innerHTML=reportRows.map(r=>
-    `<tr><td>${esc(r.queue_date)}</td><td><b>${esc(r.queue_code)}</b></td><td>${esc(r.customer_name)}</td><td>${esc(r.service_name)}</td><td>${esc(r.counter_code)} — ${esc(r.counter_name)}</td><td><span class="badge">${esc(statusLabel(r.status))}</span></td><td>${esc(r.maksud_audiensi||"-")}</td></tr>`
-  ).join("")||`<tr><td colspan="7" class="empty">Tidak ada data pada periode ini.</td></tr>`;
+    `<tr><td>${esc(r.queue_date)}</td><td><b>${esc(r.queue_code)}</b></td><td>${esc(r.customer_name)}</td><td>${esc(r.service_name)}</td><td>${esc(r.counter_code)} — ${esc(r.counter_name)}</td><td><span class="badge">${esc(statusLabel(r.status))}</span></td><td>${timeLabel(r.created_at)}</td><td>${timeLabel(r.called_at)}</td><td>${timeLabel(r.started_at)}</td><td>${timeLabel(r.completed_at)}</td><td>${timeLabel(r.skipped_at)}</td><td>${esc(r.maksud_audiensi||"-")}</td></tr>`
+  ).join("")||`<tr><td colspan="12" class="empty">Tidak ada data pada periode ini.</td></tr>`;
 
   document.getElementById("periodNote").textContent=`Periode laporan: ${start} s.d. ${end} • ${total} antrean`;
 }
 
 function exportCSV(){
   if(!reportRows.length){alert("Tampilkan laporan terlebih dahulu.");return}
-  const headers=["Tanggal","Nomor Antrean","Nama Warga","Jenis Pelayanan","Loket","Nama Loket","Status","Maksud Audiensi"];
-  const rows=reportRows.map(r=>[r.queue_date,r.queue_code,r.customer_name,r.service_name,r.counter_code,r.counter_name,statusLabel(r.status),r.maksud_audiensi||""]);
+  const headers=["Tanggal","Nomor Antrean","Nama Warga","Jenis Pelayanan","Loket","Nama Loket","Status","Diambil","Dipanggil","Mulai Melayani","Selesai","Dilewati","Maksud Audiensi"];
+  const rows=reportRows.map(r=>[r.queue_date,r.queue_code,r.customer_name,r.service_name,r.counter_code,r.counter_name,statusLabel(r.status),timeLabel(r.created_at),timeLabel(r.called_at),timeLabel(r.started_at),timeLabel(r.completed_at),timeLabel(r.skipped_at),r.maksud_audiensi||""]);
   const csv=[headers,...rows].map(row=>row.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");
   const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="laporan-antrean-"+document.getElementById("startDate").value+"-"+document.getElementById("endDate").value+".csv";a.click();URL.revokeObjectURL(a.href);
