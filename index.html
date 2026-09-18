@@ -208,6 +208,7 @@ async function loadActive(){
   content.innerHTML='<div class="empty">Gagal memuat antrean.</div>';
   showError("KESALAHAN MEMUAT ANTREAN",e);
  }
+ await loadWaitingCount();
 }
 
 async function callNext(){
@@ -262,7 +263,10 @@ document.querySelectorAll(".destination").forEach(btn=>btn.addEventListener("cli
  destinationTitle.textContent=d.title;
  personName.textContent=d.person;
  document.querySelectorAll(".destination").forEach(btn=>btn.classList.toggle("active",btn.dataset.counter===activeCounter));
+ loadCounterIds();
  loadActive();
+ loadWaitingCount();
  setInterval(loadActive,5000);
+ setInterval(loadWaitingCount,2000);
 })();
 </script></body></html>
