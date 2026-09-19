@@ -19,10 +19,20 @@ body{padding:20px}
 .waiting-alert div div{font-size:14px;margin-top:3px}
 .waiting-count{margin-left:auto;min-width:48px;height:48px;padding:0 12px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#1d9a54;color:#fff;font-size:22px;font-weight:800}
 .has-waiting .waiting-count{background:#e2a900}
-.notification-bar{display:flex;align-items:center;gap:12px;margin:0 0 18px;padding:12px 15px;background:#fff;border:1px solid #dbe5ee;border-radius:12px}
-.notification-bar button{border:0;border-radius:9px;padding:11px 14px;background:#1674b8;color:#fff;font-weight:700;cursor:pointer}
-.notification-bar button:disabled{opacity:.6;cursor:not-allowed}
-.notification-bar span{font-size:13px;color:#6b7280}
+.waiting-details{background:#fff;border:1px solid #dbe5ee;border-radius:14px;margin:0 0 18px;overflow:hidden}
+.waiting-details-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#eef6fb;color:#1674b8;font-size:14px}
+.waiting-details-head span{min-width:30px;height:30px;padding:0 9px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:#1674b8;color:#fff;font-weight:800}
+.waiting-list{padding:10px 12px}
+.waiting-item{padding:13px 14px;border:1px solid #e3eaf0;border-radius:11px;margin-bottom:9px;background:#fff}
+.waiting-item:last-child{margin-bottom:0}
+.waiting-item-top{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.waiting-item-number{font-weight:800;color:#1674b8;font-size:18px}
+.waiting-item-name{font-weight:700;color:#1f2937}
+.waiting-item-row{font-size:13px;color:#5f6b76;line-height:1.55}
+.waiting-item-row strong{color:#374151}
+.waiting-purpose{margin-top:7px;padding:8px 10px;border-radius:8px;background:#f7f2ff;color:#5e428c;font-size:13px;line-height:1.5}
+.waiting-empty{padding:14px 6px;text-align:center;color:#888;font-size:14px}
+@media(max-width:760px){.waiting-details-head{padding:12px 14px}.waiting-list{padding:8px}.waiting-item{padding:11px 12px}}
 
 
 
@@ -44,7 +54,6 @@ body{padding:20px}
 .next{grid-column:span 2;background:#1674b8;font-size:18px!important}
 .recall{background:#f0ad4e}.start{background:#28a745}.done{background:#20a0a0}.skip{background:#dc3545}
 .note{margin-top:15px;color:#777;font-size:13px}
-@media(max-width:760px){.notification-bar{align-items:flex-start;flex-direction:column}}
 @media(max-width:760px){
  body{padding:12px}.destinations{grid-template-columns:repeat(2,1fr)}.waiting-alert{padding:12px}.waiting-alert div div{font-size:12px}.waiting-count{min-width:42px;height:42px}.number{font-size:64px}.name{font-size:22px}.actions{grid-template-columns:1fr}.next{grid-column:span 1}
 }
@@ -61,11 +70,11 @@ body{padding:20px}
   </div>
   <span id="waitingCount" class="waiting-count">0</span>
 </section>
-<section class="notification-bar">
-   <button id="btnNotify" type="button">🔔 AKTIFKAN NOTIFIKASI DESKTOP</button>
-   <span id="notifyStatus">Klik untuk mengaktifkan notifikasi desktop.</span>
- </section>
- <section class="card">
+<section id="waitingDetails" class="waiting-details">
+<div class="waiting-details-head"><strong>DAFTAR ANTREAN MENUNGGU</strong><span id="waitingDetailsCount">0</span></div>
+<div id="waitingList" class="waiting-list"><div class="waiting-empty">Memuat daftar antrean...</div></div>
+</section>
+<section class="card">
 <div id="queueContent"><div class="empty">Memuat antrean...</div></div>
 <div id="message" class="message"></div><div id="errorBox" class="error"></div>
 <div class="actions">
@@ -109,16 +118,9 @@ const waitingAlert=document.getElementById("waitingAlert");
 const waitingTitle=document.getElementById("waitingTitle");
 const waitingText=document.getElementById("waitingText");
 const waitingCount=document.getElementById("waitingCount");
-const btnNotify=document.getElementById("btnNotify");
-const notifyStatus=document.getElementById("notifyStatus");
+const waitingDetailsCount=document.getElementById("waitingDetailsCount");
+const waitingList=document.getElementById("waitingList");
 let counterIds={};
-let notificationChannel=null;
-try{
-  if("BroadcastChannel" in window) notificationChannel=new BroadcastChannel("desa-bukit-raya-antrean");
-}catch(e){
-  console.error("BroadcastChannel tidak tersedia:",e);
-}
-
 
 function esc(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
 function showMessage(t){message.textContent=t||"";}
@@ -174,70 +176,7 @@ function speak(data){
  window.speechSynthesis.speak(u);
 }
 
-
-const NOTIFICATION_HELPER_URL="https://vikiosetyobudi18-ai.github.io/antrean-desa-bukit-raya/notifikasi.html";
-
-function notificationSupported(){
-  // The actual permission request is deliberately NOT made inside this iframe.
-  return !!notificationChannel;
-}
-
-function notificationHelperMessage(type="status"){
-  if(type==="open"){
-    notifyStatus.textContent="Membuka halaman aktivasi notifikasi...";
-  }else if(type==="active"){
-    btnNotify.textContent="🔔 NOTIFIKASI DESKTOP AKTIF";
-    notifyStatus.textContent="Notifikasi dipantau melalui jendela notifikasi desktop.";
-  }else if(type==="blocked"){
-    btnNotify.textContent="🔕 AKTIFKAN ULANG NOTIFIKASI";
-    notifyStatus.textContent="Izin notifikasi diblokir. Buka halaman aktivasi untuk mengubah izin browser.";
-  }else{
-    btnNotify.textContent="🔔 AKTIFKAN NOTIFIKASI DESKTOP";
-    notifyStatus.textContent="Klik untuk membuka halaman aktivasi notifikasi.";
-  }
-}
-
-function sendCounterToNotificationHelper(){
-  if(!notificationChannel)return;
-  notificationChannel.postMessage({
-    type:"set_counter",
-    counter:String(activeCounter).toUpperCase(),
-    title:destinationData[activeCounter]?.title||activeCounter,
-    person:destinationData[activeCounter]?.person||""
-  });
-}
-
-function openNotificationHelper(){
-  notificationHelperMessage("open");
-  sendCounterToNotificationHelper();
-
-  const url=NOTIFICATION_HELPER_URL+"?counter="+encodeURIComponent(String(activeCounter).toUpperCase());
-  const helper=window.open(
-    url,
-    "desaBukitRayaNotification",
-    "width=520,height=700,resizable=yes,scrollbars=yes"
-  );
-
-  if(!helper){
-    notifyStatus.textContent="Jendela aktivasi diblokir browser. Izinkan pop-up untuk situs ini.";
-  }
-}
-
-if(notificationChannel){
-  notificationChannel.onmessage=(event)=>{
-    const data=event.data||{};
-    if(data.type==="notification_status"){
-      if(data.status==="granted"){
-        notificationHelperMessage("active");
-      }else if(data.status==="denied"){
-        notificationHelperMessage("blocked");
-      }
-    }
-  };
-}
-
 async function loadCounterIds(){
-
   try{
     const r=await fetch(SUPABASE_URL+"/rest/v1/counters?select=id,code&is_active=eq.true",{
       headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY,Accept:"application/json"}
@@ -280,6 +219,65 @@ async function loadWaitingCount(){
  }
 }
 
+
+function serviceCategory(serviceName,counterCode){
+ const name=String(serviceName||"").toLowerCase();
+ const counter=String(counterCode||activeCounter||"").toUpperCase();
+ if(counter==="K"||counter==="S") return "Audiensi";
+ if(counter==="B") return "Administrasi Kependudukan";
+ if(counter==="D") return "Administrasi Pernikahan";
+ if(counter==="C") return "Administrasi Umum";
+ if(counter==="E") return "Kesejahteraan";
+ if(counter==="A"){
+  if(name.includes("pajak")||name.includes("pbb")||name.includes("bumi dan bangunan")) return "Pajak Bumi dan Bangunan";
+  return "Pertanahan";
+ }
+ return "Pelayanan";
+}
+function todayLocalDate(){
+ const d=new Date();
+ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+async function loadWaitingDetails(){
+ try{
+  const counterId=counterIds[String(activeCounter).toUpperCase()];
+  if(!counterId){
+   waitingDetailsCount.textContent="0";
+   waitingList.innerHTML='<div class="waiting-empty">Loket belum tersedia.</div>';
+   return;
+  }
+  const url=SUPABASE_URL+
+   "/rest/v1/queues?select=id,queue_code,customer_name,maksud_audiensi,queue_number,services(name)"+
+   "&queue_date=eq."+encodeURIComponent(todayLocalDate())+
+   "&counter_id=eq."+encodeURIComponent(counterId)+
+   "&status=eq.waiting"+
+   "&order=queue_number.asc";
+  const r=await fetch(url,{cache:"no-store",headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY,Accept:"application/json"}});
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  const rows=await r.json();
+  waitingDetailsCount.textContent=rows.length;
+  if(!rows.length){
+   waitingList.innerHTML='<div class="waiting-empty">Belum ada warga yang menunggu.</div>';
+   return;
+  }
+  const audiensi=activeCounter==="K"||activeCounter==="S";
+  waitingList.innerHTML=rows.map(q=>{
+   const serviceName=q.services?.name||"—";
+   const category=serviceCategory(serviceName,activeCounter);
+   return `<div class="waiting-item">
+<div class="waiting-item-top"><span class="waiting-item-number">${esc(q.queue_code||"—")}</span><span class="waiting-item-name">${esc(q.customer_name||"—")}</span></div>
+<div class="waiting-item-row"><strong>Kategori pelayanan:</strong> ${esc(category)}</div>
+<div class="waiting-item-row"><strong>Jenis pelayanan:</strong> ${esc(serviceName)}</div>
+${audiensi&&q.maksud_audiensi?`<div class="waiting-purpose"><strong>Maksud audiensi:</strong> ${esc(q.maksud_audiensi)}</div>`:""}
+</div>`;
+  }).join("");
+ }catch(e){
+  console.error("Gagal memuat daftar antrean:",e);
+  waitingDetailsCount.textContent="—";
+  waitingList.innerHTML='<div class="waiting-empty">Daftar antrean belum dapat dimuat.</div>';
+ }
+}
+
 async function loadActive(){
  clearError();
  try{
@@ -291,6 +289,7 @@ async function loadActive(){
   showError("KESALAHAN MEMUAT ANTREAN",e);
  }
  await loadWaitingCount();
+ await loadWaitingDetails();
 }
 
 async function callNext(){
@@ -328,7 +327,6 @@ btnRecall.addEventListener("click",recall);
 btnStart.addEventListener("click",start);
 btnDone.addEventListener("click",done);
 btnSkip.addEventListener("click",skip);
-btnNotify.addEventListener("click",openNotificationHelper);
 
 document.querySelectorAll(".destination").forEach(btn=>btn.addEventListener("click",async()=>{
  activeCounter=btn.dataset.counter;
@@ -338,7 +336,6 @@ document.querySelectorAll(".destination").forEach(btn=>btn.addEventListener("cli
  destinationTitle.textContent=d.title;
  personName.textContent=d.person;
  activeQueue=null;
- sendCounterToNotificationHelper();
  await loadActive();
  await loadWaitingCount();
 }));
@@ -349,10 +346,10 @@ document.querySelectorAll(".destination").forEach(btn=>btn.addEventListener("cli
  personName.textContent=d.person;
  document.querySelectorAll(".destination").forEach(btn=>btn.classList.toggle("active",btn.dataset.counter===activeCounter));
  await loadCounterIds();
- sendCounterToNotificationHelper();
  await loadActive();
  await loadWaitingCount();
  setInterval(loadActive,5000);
  setInterval(loadWaitingCount,2000);
+ setInterval(loadWaitingDetails,3000);
 })();
 </script></body></html>
