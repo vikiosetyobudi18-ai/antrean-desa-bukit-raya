@@ -35,6 +35,8 @@ button:disabled{opacity:.55;cursor:not-allowed}
 <div id="status" class="status">
 Klik tombol di atas, kemudian pilih <strong>Allow / Izinkan</strong> ketika browser menampilkan permintaan izin.
 </div>
+<div id="monitor" class="status" style="margin-top:12px">🟡 Menunggu pemeriksaan antrean...</div>
+<button id="btnTest" type="button" style="margin-top:12px;background:#6a479f">🔔 TES NOTIFIKASI DESKTOP</button>
 
 <p class="small">
 Halaman ini perlu tetap terbuka atau diminimalkan agar dapat menerima antrean baru.
@@ -150,7 +152,10 @@ if(channel){
 
 updatePermissionState();
 
-/* ---------- Antrean baru ---------- */
+/* ---------- Pemantauan antrean ---------- */
+
+const monitor=document.getElementById("monitor");
+const btnTest=document.getElementById("btnTest");
 
 let knownWaitingIds=new Set();
 let baselineReady=false;
@@ -164,12 +169,44 @@ function todayLocal(){
   return y+"-"+m+"-"+day;
 }
 
+function esc(v){
+  return String(v??"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+function setMonitor(text,cls=""){
+  monitor.className="status "+cls;
+  monitor.innerHTML=text;
+}
+
+function formatNow(){
+  return new Date().toLocaleTimeString("id-ID",{
+    hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false
+  });
+}
+
+function updateMonitor(count,extra=""){
+  setMonitor(
+    "🟢 <strong>TERHUBUNG</strong><br>"+
+    "Loket: <strong>"+esc(destinationData[activeCounter].title)+"</strong><br>"+
+    "Pemeriksaan terakhir: <strong>"+formatNow()+"</strong><br>"+
+    "Antrean menunggu terdeteksi: <strong>"+count+"</strong>"+
+    (extra?"<br>"+extra:""),
+    "ok"
+  );
+}
+
 async function getCounterId(){
   const url=SUPABASE_URL+
     "/rest/v1/counters?select=id,code&is_active=eq.true&code=eq."+
     encodeURIComponent(activeCounter);
 
   const r=await fetch(url,{
+    cache:"no-store",
     headers:{
       apikey:SUPABASE_KEY,
       Authorization:"Bearer "+SUPABASE_KEY,
@@ -177,23 +214,24 @@ async function getCounterId(){
     }
   });
 
-  if(!r.ok)throw new Error("HTTP "+r.status);
+  if(!r.ok)throw new Error("Gagal membaca loket: HTTP "+r.status);
   const rows=await r.json();
-  return rows[0]?.id||null;
+  if(!rows.length)throw new Error("Loket "+activeCounter+" tidak ditemukan atau tidak aktif.");
+  return rows[0].id;
 }
 
 async function getWaiting(){
   const counterId=await getCounterId();
-  if(!counterId)return [];
 
   const url=SUPABASE_URL+
-    "/rest/v1/queues?select=id,queue_code,customer_name,service_id,maksud_audiensi,services(name)"+
+    "/rest/v1/queues?select=id,queue_code,customer_name,service_id,maksud_audiensi,created_at,services(name)"+
     "&queue_date=eq."+encodeURIComponent(todayLocal())+
     "&counter_id=eq."+encodeURIComponent(counterId)+
     "&status=eq.waiting"+
     "&order=id.asc";
 
   const r=await fetch(url,{
+    cache:"no-store",
     headers:{
       apikey:SUPABASE_KEY,
       Authorization:"Bearer "+SUPABASE_KEY,
@@ -201,15 +239,21 @@ async function getWaiting(){
     }
   });
 
-  if(!r.ok)throw new Error("HTTP "+r.status+" - "+await r.text());
-  return await r.json();
+  if(!r.ok){
+    throw new Error("Gagal membaca antrean: HTTP "+r.status+" - "+await r.text());
+  }
+
+  const rows=await r.json();
+  if(!Array.isArray(rows))throw new Error("Respons antrean tidak berbentuk daftar.");
+  return rows;
 }
 
 function showQueueNotification(q){
-  if(!("Notification" in window) || Notification.permission!=="granted")return;
+  if(!("Notification" in window) || Notification.permission!=="granted")return false;
 
   const serviceName=q.services?.name||"Pelayanan";
   const audiensi=(activeCounter==="K"||activeCounter==="S");
+
   let body=(q.queue_code||"Antrean")+" — "+(q.customer_name||"Warga")+
     "\nPelayanan: "+serviceName;
 
@@ -217,22 +261,57 @@ function showQueueNotification(q){
     body+="\nMaksud: "+q.maksud_audiensi;
   }
 
-  const n=new Notification("🔔 Antrean Baru — Desa Bukit Raya",{
-    body:body,
-    tag:"desa-bukit-raya-antrean-"+q.id,
-    renotify:true
-  });
+  try{
+    const n=new Notification("🔔 Antrean Baru — Desa Bukit Raya",{
+      body,
+      tag:"desa-bukit-raya-antrean-"+q.id,
+      renotify:true
+    });
+    n.onclick=()=>{window.focus();n.close();};
+    return true;
+  }catch(e){
+    console.error("Notification gagal dibuat:",e);
+    return false;
+  }
+}
 
-  n.onclick=()=>{
-    window.focus();
-    n.close();
-  };
+async function establishBaseline(){
+  try{
+    const rows=await getWaiting();
+    knownWaitingIds=new Set(rows.map(q=>String(q.id)));
+    baselineReady=true;
+
+    const latest=rows[rows.length-1];
+    updateMonitor(
+      rows.length,
+      latest
+        ? "Antrean terbaru: <strong>"+esc(latest.queue_code||"—")+
+          "</strong> — "+esc(latest.customer_name||"")
+        : "Belum ada antrean menunggu."
+    );
+  }catch(e){
+    setMonitor(
+      "🔴 <strong>GAGAL MEMBACA ANTREAN</strong><br>"+esc(e.message||String(e)),
+      "err"
+    );
+  }
 }
 
 async function checkNewQueues(){
-  if(busy || !("Notification" in window) || Notification.permission!=="granted")return;
+  if(busy)return;
+
+  if(!("Notification" in window)){
+    setMonitor("🔴 Browser tidak mendukung notifikasi desktop.","err");
+    return;
+  }
+
+  if(Notification.permission!=="granted"){
+    setMonitor("🟡 Izin notifikasi belum aktif.","warn");
+    return;
+  }
 
   busy=true;
+
   try{
     const rows=await getWaiting();
     const currentIds=new Set(rows.map(q=>String(q.id)));
@@ -240,39 +319,113 @@ async function checkNewQueues(){
     if(!baselineReady){
       knownWaitingIds=currentIds;
       baselineReady=true;
+      updateMonitor(rows.length,"Baseline antrean berhasil disiapkan.");
       return;
     }
+
+    let notified=0;
+    let latestNew=null;
 
     for(const q of rows){
       const id=String(q.id);
       if(!knownWaitingIds.has(id)){
-        showQueueNotification(q);
+        if(showQueueNotification(q)){
+          notified++;
+          latestNew=q;
+        }
       }
     }
 
     knownWaitingIds=currentIds;
+
+    if(notified){
+      updateMonitor(
+        rows.length,
+        "🔔 Notifikasi dikirim: <strong>"+notified+
+        "</strong> antrean baru"+
+        (latestNew
+          ? " — "+esc(latestNew.queue_code||"")+" / "+esc(latestNew.customer_name||"")
+          : "")
+      );
+    }else{
+      updateMonitor(rows.length);
+    }
+
   }catch(e){
     console.error("Gagal memeriksa antrean baru:",e);
+    setMonitor(
+      "🔴 <strong>GAGAL MEMBACA ANTREAN</strong><br>"+
+      esc(e.message||String(e))+
+      "<br>Pemeriksaan terakhir: "+formatNow(),
+      "err"
+    );
   }finally{
     busy=false;
   }
 }
 
-/* Ketika panel mengganti loket, reset baseline agar antrean lama tidak dianggap baru. */
+btnTest.addEventListener("click",()=>{
+  if(!("Notification" in window) || Notification.permission!=="granted"){
+    setMonitor("🟡 Izin notifikasi belum aktif.","warn");
+    return;
+  }
+
+  const ok=showQueueNotification({
+    id:"test-"+Date.now(),
+    queue_code:"TEST-001",
+    customer_name:"UJI NOTIFIKASI",
+    services:{name:"Tes Notifikasi Desktop"},
+    maksud_audiensi:""
+  });
+
+  setMonitor(
+    ok
+      ? "🟢 <strong>TES NOTIFIKASI DIKIRIM</strong><br>Periksa pojok kanan bawah desktop."
+      : "🔴 Gagal membuat notifikasi desktop.",
+    ok?"ok":"err"
+  );
+});
+
+/* Panel dapat mengganti loket melalui BroadcastChannel. */
 if(channel){
   channel.onmessage=(event)=>{
     const data=event.data||{};
 
     if(data.type==="set_counter" && data.counter && destinationData[data.counter]){
       activeCounter=data.counter;
-      destination.textContent=destinationData[activeCounter].title+" — "+destinationData[activeCounter].person;
+      destination.textContent=
+        destinationData[activeCounter].title+" — "+
+        destinationData[activeCounter].person;
+
       knownWaitingIds=new Set();
       baselineReady=false;
+
+      if(Notification.permission==="granted"){
+        establishBaseline();
+      }else{
+        updatePermissionState();
+      }
     }
   };
 }
 
-setInterval(checkNewQueues,3000);
+async function startMonitoring(){
+  if(Notification.permission!=="granted"){
+    updatePermissionState();
+    setMonitor(
+      "🟡 Menunggu izin notifikasi. Setelah izin aktif, pemantauan antrean dimulai.",
+      "warn"
+    );
+    return;
+  }
+
+  await establishBaseline();
+  setInterval(checkNewQueues,3000);
+  checkNewQueues();
+}
+
+startMonitoring();
+
 </script>
 </body>
 </html>
