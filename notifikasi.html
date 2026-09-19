@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Aktivasi Notifikasi Antrean - Desa Bukit Raya</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#f5f8fb;font-family:Arial,Helvetica,sans-serif;color:#1f2937}
+body{padding:28px}
+.app{max-width:620px;margin:0 auto}
+.card{background:#fff;border-radius:18px;box-shadow:0 5px 25px rgba(0,0,0,.09);padding:28px}
+h1{margin:0 0 8px;color:#1674b8;font-size:28px}
+.sub{margin:0 0 24px;color:#6b7280;line-height:1.5}
+.destination{padding:14px 16px;border-radius:12px;background:#eef6fb;color:#1674b8;font-weight:700;margin-bottom:18px}
+button{width:100%;border:0;border-radius:11px;padding:15px;color:#fff;background:#1674b8;font-size:16px;font-weight:700;cursor:pointer}
+button:disabled{opacity:.55;cursor:not-allowed}
+.status{margin-top:18px;padding:14px;border-radius:11px;background:#f5f8fb;line-height:1.5}
+.small{margin-top:18px;color:#6b7280;font-size:13px;line-height:1.55}
+.ok{background:#eaf7ee;color:#196b38}
+.warn{background:#fff4cf;color:#7a5700}
+.err{background:#fff1f1;color:#a00000}
+</style>
+</head>
+<body>
+<main class="app">
+<section class="card">
+<h1>🔔 Notifikasi Desktop</h1>
+<p class="sub">Desa Bukit Raya — aktivasi notifikasi antrean untuk petugas panel.</p>
+
+<div class="destination" id="destination">Memuat loket...</div>
+
+<button id="btnPermission">🔔 IZINKAN NOTIFIKASI DESKTOP</button>
+
+<div id="status" class="status">
+Klik tombol di atas, kemudian pilih <strong>Allow / Izinkan</strong> ketika browser menampilkan permintaan izin.
+</div>
+
+<p class="small">
+Halaman ini perlu tetap terbuka atau diminimalkan agar dapat menerima antrean baru.
+Panel antrean utama tetap dapat digunakan seperti biasa.
+</p>
+</section>
+</main>
+
+<script>
+const SUPABASE_URL='https://pyawggjlbrvneflpsalj.supabase.co';
+const SUPABASE_KEY='sb_publishable_5SdvMobBB2AvtXcJd_Scxw_rVsoqM8R';
+
+const destinationData={
+ A:{title:"LOKET A",person:"Arman"},
+ B:{title:"LOKET B",person:"Vikio"},
+ C:{title:"LOKET C",person:"Dilla"},
+ D:{title:"LOKET D",person:"Ayu"},
+ E:{title:"LOKET E",person:"Nia"},
+ K:{title:"RUANG KEPALA DESA",person:"Kepala Desa"},
+ S:{title:"RUANG SEKRETARIS DESA",person:"Sekretaris Desa"}
+};
+
+let activeCounter=new URLSearchParams(location.search).get("counter");
+activeCounter=(activeCounter||"B").toUpperCase();
+if(!destinationData[activeCounter])activeCounter="B";
+
+const destination=document.getElementById("destination");
+const btnPermission=document.getElementById("btnPermission");
+const statusBox=document.getElementById("status");
+
+destination.textContent=destinationData[activeCounter].title+" — "+destinationData[activeCounter].person;
+
+let channel=null;
+try{
+  if("BroadcastChannel" in window){
+    channel=new BroadcastChannel("desa-bukit-raya-antrean");
+  }
+}catch(e){
+  console.error(e);
+}
+
+function sendStatus(status){
+  if(channel){
+    channel.postMessage({type:"notification_status",status});
+  }
+}
+
+function setStatus(text,cls=""){
+  statusBox.className="status "+cls;
+  statusBox.innerHTML=text;
+}
+
+function updatePermissionState(){
+  if(!("Notification" in window)){
+    btnPermission.disabled=true;
+    setStatus("Browser ini tidak mendukung Desktop Notification API.","err");
+    return;
+  }
+
+  if(Notification.permission==="granted"){
+    btnPermission.textContent="✓ NOTIFIKASI SUDAH AKTIF";
+    setStatus(
+      "Notifikasi desktop <strong>sudah aktif</strong> untuk halaman ini. "+
+      "Silakan minimalkan tab/jendela ini dan lanjutkan menggunakan panel antrean.",
+      "ok"
+    );
+    sendStatus("granted");
+  }else if(Notification.permission==="denied"){
+    btnPermission.textContent="🔕 IZIN DIBLOKIR BROWSER";
+    setStatus(
+      "Izin notifikasi sedang diblokir oleh browser. "+
+      "Klik ikon kunci/pengaturan situs di sebelah kiri alamat browser, lalu ubah Notifications menjadi Allow.",
+      "err"
+    );
+    sendStatus("denied");
+  }else{
+    btnPermission.textContent="🔔 IZINKAN NOTIFIKASI DESKTOP";
+    setStatus(
+      "Klik tombol, kemudian pilih <strong>Allow / Izinkan</strong> ketika browser meminta izin.",
+      "warn"
+    );
+  }
+}
+
+async function requestPermission(){
+  if(!("Notification" in window))return;
+
+  try{
+    const permission=await Notification.requestPermission();
+    updatePermissionState();
+
+    if(permission==="granted"){
+      new Notification("✓ Notifikasi Desa Bukit Raya Aktif",{
+        body:"Notifikasi antrean untuk "+destinationData[activeCounter].title+" telah diaktifkan."
+      });
+    }
+  }catch(e){
+    setStatus("Gagal meminta izin notifikasi: "+(e.message||e),"err");
+  }
+}
+
+btnPermission.addEventListener("click",requestPermission);
+
+if(channel){
+  channel.onmessage=(event)=>{
+    const data=event.data||{};
+    if(data.type==="set_counter" && data.counter && destinationData[data.counter]){
+      activeCounter=data.counter;
+      destination.textContent=destinationData[activeCounter].title+" — "+destinationData[activeCounter].person;
+    }
+  };
+}
+
+updatePermissionState();
+
+/* ---------- Antrean baru ---------- */
+
+let knownWaitingIds=new Set();
+let baselineReady=false;
+let busy=false;
+
+function todayLocal(){
+  const d=new Date();
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,"0");
+  const day=String(d.getDate()).padStart(2,"0");
+  return y+"-"+m+"-"+day;
+}
+
+async function getCounterId(){
+  const url=SUPABASE_URL+
+    "/rest/v1/counters?select=id,code&is_active=eq.true&code=eq."+
+    encodeURIComponent(activeCounter);
+
+  const r=await fetch(url,{
+    headers:{
+      apikey:SUPABASE_KEY,
+      Authorization:"Bearer "+SUPABASE_KEY,
+      Accept:"application/json"
+    }
+  });
+
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  const rows=await r.json();
+  return rows[0]?.id||null;
+}
+
+async function getWaiting(){
+  const counterId=await getCounterId();
+  if(!counterId)return [];
+
+  const url=SUPABASE_URL+
+    "/rest/v1/queues?select=id,queue_code,customer_name,service_id,maksud_audiensi,services(name)"+
+    "&queue_date=eq."+encodeURIComponent(todayLocal())+
+    "&counter_id=eq."+encodeURIComponent(counterId)+
+    "&status=eq.waiting"+
+    "&order=id.asc";
+
+  const r=await fetch(url,{
+    headers:{
+      apikey:SUPABASE_KEY,
+      Authorization:"Bearer "+SUPABASE_KEY,
+      Accept:"application/json"
+    }
+  });
+
+  if(!r.ok)throw new Error("HTTP "+r.status+" - "+await r.text());
+  return await r.json();
+}
+
+function showQueueNotification(q){
+  if(!("Notification" in window) || Notification.permission!=="granted")return;
+
+  const serviceName=q.services?.name||"Pelayanan";
+  const audiensi=(activeCounter==="K"||activeCounter==="S");
+  let body=(q.queue_code||"Antrean")+" — "+(q.customer_name||"Warga")+
+    "\nPelayanan: "+serviceName;
+
+  if(audiensi && q.maksud_audiensi){
+    body+="\nMaksud: "+q.maksud_audiensi;
+  }
+
+  const n=new Notification("🔔 Antrean Baru — Desa Bukit Raya",{
+    body:body,
+    tag:"desa-bukit-raya-antrean-"+q.id,
+    renotify:true
+  });
+
+  n.onclick=()=>{
+    window.focus();
+    n.close();
+  };
+}
+
+async function checkNewQueues(){
+  if(busy || !("Notification" in window) || Notification.permission!=="granted")return;
+
+  busy=true;
+  try{
+    const rows=await getWaiting();
+    const currentIds=new Set(rows.map(q=>String(q.id)));
+
+    if(!baselineReady){
+      knownWaitingIds=currentIds;
+      baselineReady=true;
+      return;
+    }
+
+    for(const q of rows){
+      const id=String(q.id);
+      if(!knownWaitingIds.has(id)){
+        showQueueNotification(q);
+      }
+    }
+
+    knownWaitingIds=currentIds;
+  }catch(e){
+    console.error("Gagal memeriksa antrean baru:",e);
+  }finally{
+    busy=false;
+  }
+}
+
+/* Ketika panel mengganti loket, reset baseline agar antrean lama tidak dianggap baru. */
+if(channel){
+  channel.onmessage=(event)=>{
+    const data=event.data||{};
+
+    if(data.type==="set_counter" && data.counter && destinationData[data.counter]){
+      activeCounter=data.counter;
+      destination.textContent=destinationData[activeCounter].title+" — "+destinationData[activeCounter].person;
+      knownWaitingIds=new Set();
+      baselineReady=false;
+    }
+  };
+}
+
+setInterval(checkNewQueues,3000);
+</script>
+</body>
+</html>
