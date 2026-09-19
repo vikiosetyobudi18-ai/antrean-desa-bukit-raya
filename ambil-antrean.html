@@ -44,7 +44,15 @@ input:focus,select:focus{border-color:var(--blue2);box-shadow:0 0 0 3px rgba(18,
 @media(max-width:850px){
  .container{width:calc(100% - 18px);padding-top:14px}
  .layout{grid-template-columns:1fr}
- .service-list{max-height:none;overflow:visible;padding-right:0}
+ .service-list{
+  max-height:360px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding-right:6px;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y;
+  overscroll-behavior:contain;
+}
  .hero{padding:23px 20px;border-radius:19px}
  .card{padding:18px;border-radius:17px}
 }
