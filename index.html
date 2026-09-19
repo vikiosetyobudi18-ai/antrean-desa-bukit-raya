@@ -63,7 +63,7 @@ body{padding:20px}
 </section>
 <section class="notification-bar">
    <button id="btnNotify" type="button">🔔 AKTIFKAN NOTIFIKASI DESKTOP</button>
-   <span id="notifyStatus">Notifikasi desktop belum diaktifkan.</span>
+   <span id="notifyStatus">Klik untuk mengaktifkan notifikasi desktop.</span>
  </section>
  <section class="card">
 <div id="queueContent"><div class="empty">Memuat antrean...</div></div>
@@ -112,9 +112,12 @@ const waitingCount=document.getElementById("waitingCount");
 const btnNotify=document.getElementById("btnNotify");
 const notifyStatus=document.getElementById("notifyStatus");
 let counterIds={};
-let notificationBaselineReady=false;
-let knownWaitingIds=new Set();
-let notificationBusy=false;
+let notificationChannel=null;
+try{
+  if("BroadcastChannel" in window) notificationChannel=new BroadcastChannel("desa-bukit-raya-antrean");
+}catch(e){
+  console.error("BroadcastChannel tidak tersedia:",e);
+}
 
 
 function esc(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
@@ -172,150 +175,69 @@ function speak(data){
 }
 
 
-function todayLocal(){
-  const d=new Date();
-  const y=d.getFullYear();
-  const m=String(d.getMonth()+1).padStart(2,"0");
-  const day=String(d.getDate()).padStart(2,"0");
-  return y+"-"+m+"-"+day;
-}
+const NOTIFICATION_HELPER_URL="https://vikiosetyobudi18-ai.github.io/antrean-desa-bukit-raya/notifikasi.html";
 
 function notificationSupported(){
-  return "Notification" in window;
+  // The actual permission request is deliberately NOT made inside this iframe.
+  return !!notificationChannel;
 }
 
-function updateNotificationStatus(){
-  if(!notificationSupported()){
-    notifyStatus.textContent="Browser ini tidak mendukung notifikasi desktop.";
-    btnNotify.disabled=true;
-    return;
-  }
-
-  if(Notification.permission==="granted"){
+function notificationHelperMessage(type="status"){
+  if(type==="open"){
+    notifyStatus.textContent="Membuka halaman aktivasi notifikasi...";
+  }else if(type==="active"){
     btnNotify.textContent="🔔 NOTIFIKASI DESKTOP AKTIF";
-    notifyStatus.textContent="Notifikasi aktif untuk "+(destinationData[activeCounter]?.title||activeCounter)+".";
-  }else if(Notification.permission==="denied"){
-    btnNotify.textContent="🔕 NOTIFIKASI DIBLOKIR";
-    notifyStatus.textContent="Izinkan notifikasi dari pengaturan browser untuk mengaktifkannya.";
+    notifyStatus.textContent="Notifikasi dipantau melalui jendela notifikasi desktop.";
+  }else if(type==="blocked"){
+    btnNotify.textContent="🔕 AKTIFKAN ULANG NOTIFIKASI";
+    notifyStatus.textContent="Izin notifikasi diblokir. Buka halaman aktivasi untuk mengubah izin browser.";
   }else{
     btnNotify.textContent="🔔 AKTIFKAN NOTIFIKASI DESKTOP";
-    notifyStatus.textContent="Klik tombol untuk mengizinkan notifikasi desktop.";
+    notifyStatus.textContent="Klik untuk membuka halaman aktivasi notifikasi.";
   }
 }
 
-async function enableNotifications(){
-  if(!notificationSupported())return;
-
-  try{
-    const permission=await Notification.requestPermission();
-    updateNotificationStatus();
-
-    if(permission==="granted"){
-      showMessage("Notifikasi desktop berhasil diaktifkan.");
-      await primeNotificationBaseline();
-    }else if(permission==="denied"){
-      showMessage("Notifikasi desktop diblokir oleh browser.");
-    }
-  }catch(e){
-    showError("GAGAL MENGAKTIFKAN NOTIFIKASI",e);
-  }
-}
-
-async function getWaitingForNotification(){
-  const counterId=counterIds[String(activeCounter).toUpperCase()];
-  if(!counterId)return [];
-
-  const url=SUPABASE_URL+
-    "/rest/v1/queues?select=id,queue_code,customer_name,service_id,maksud_audiensi,services(name)"+
-    "&queue_date=eq."+encodeURIComponent(todayLocal())+
-    "&counter_id=eq."+encodeURIComponent(counterId)+
-    "&status=eq.waiting"+
-    "&order=id.asc";
-
-  const r=await fetch(url,{
-    headers:{
-      apikey:SUPABASE_KEY,
-      Authorization:"Bearer "+SUPABASE_KEY,
-      Accept:"application/json"
-    }
+function sendCounterToNotificationHelper(){
+  if(!notificationChannel)return;
+  notificationChannel.postMessage({
+    type:"set_counter",
+    counter:String(activeCounter).toUpperCase(),
+    title:destinationData[activeCounter]?.title||activeCounter,
+    person:destinationData[activeCounter]?.person||""
   });
-
-  if(!r.ok){
-    const text=await r.text();
-    throw new Error("HTTP "+r.status+" - "+text);
-  }
-  return await r.json();
 }
 
-function notifyNewQueue(q){
-  if(!notificationSupported() || Notification.permission!=="granted" || !q)return;
+function openNotificationHelper(){
+  notificationHelperMessage("open");
+  sendCounterToNotificationHelper();
 
-  const serviceName=q.services?.name||"Pelayanan";
-  const isAudiensi=(activeCounter==="K"||activeCounter==="S");
-  const purpose=q.maksud_audiensi ? String(q.maksud_audiensi) : "";
+  const url=NOTIFICATION_HELPER_URL+"?counter="+encodeURIComponent(String(activeCounter).toUpperCase());
+  const helper=window.open(
+    url,
+    "desaBukitRayaNotification",
+    "width=520,height=700,resizable=yes,scrollbars=yes"
+  );
 
-  let body=(q.queue_code||"Antrean")+" — "+(q.customer_name||"Warga")+
-    "\nPelayanan: "+serviceName;
-
-  if(isAudiensi && purpose){
-    body+="\nMaksud: "+purpose;
+  if(!helper){
+    notifyStatus.textContent="Jendela aktivasi diblokir browser. Izinkan pop-up untuk situs ini.";
   }
+}
 
-  const n=new Notification("🔔 Antrean Baru — Desa Bukit Raya",{
-    body:body,
-    tag:"antrean-"+q.id,
-    renotify:true
-  });
-
-  n.onclick=()=>{
-    window.focus();
-    n.close();
+if(notificationChannel){
+  notificationChannel.onmessage=(event)=>{
+    const data=event.data||{};
+    if(data.type==="notification_status"){
+      if(data.status==="granted"){
+        notificationHelperMessage("active");
+      }else if(data.status==="denied"){
+        notificationHelperMessage("blocked");
+      }
+    }
   };
 }
 
-async function primeNotificationBaseline(){
-  if(!notificationSupported() || Notification.permission!=="granted")return;
-
-  try{
-    const rows=await getWaitingForNotification();
-    knownWaitingIds=new Set(rows.map(q=>String(q.id)));
-    notificationBaselineReady=true;
-  }catch(e){
-    console.error("Gagal menyiapkan baseline notifikasi:",e);
-  }
-}
-
-async function checkNewWaitingNotifications(){
-  if(notificationBusy || !notificationSupported() || Notification.permission!=="granted")return;
-
-  notificationBusy=true;
-  try{
-    const rows=await getWaitingForNotification();
-    const currentIds=new Set(rows.map(q=>String(q.id)));
-
-    // Pemeriksaan pertama hanya mencatat antrean yang sudah ada.
-    if(!notificationBaselineReady){
-      knownWaitingIds=currentIds;
-      notificationBaselineReady=true;
-      return;
-    }
-
-    for(const q of rows){
-      const id=String(q.id);
-      if(!knownWaitingIds.has(id)){
-        notifyNewQueue(q);
-      }
-    }
-
-    knownWaitingIds=currentIds;
-  }catch(e){
-    console.error("Gagal memeriksa antrean baru untuk notifikasi:",e);
-  }finally{
-    notificationBusy=false;
-  }
-}
-
 async function loadCounterIds(){
+
   try{
     const r=await fetch(SUPABASE_URL+"/rest/v1/counters?select=id,code&is_active=eq.true",{
       headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY,Accept:"application/json"}
@@ -406,7 +328,7 @@ btnRecall.addEventListener("click",recall);
 btnStart.addEventListener("click",start);
 btnDone.addEventListener("click",done);
 btnSkip.addEventListener("click",skip);
-btnNotify.addEventListener("click",enableNotifications);
+btnNotify.addEventListener("click",openNotificationHelper);
 
 document.querySelectorAll(".destination").forEach(btn=>btn.addEventListener("click",async()=>{
  activeCounter=btn.dataset.counter;
@@ -416,12 +338,9 @@ document.querySelectorAll(".destination").forEach(btn=>btn.addEventListener("cli
  destinationTitle.textContent=d.title;
  personName.textContent=d.person;
  activeQueue=null;
- notificationBaselineReady=false;
- knownWaitingIds=new Set();
- updateNotificationStatus();
+ sendCounterToNotificationHelper();
  await loadActive();
  await loadWaitingCount();
- if(notificationSupported() && Notification.permission==="granted") await primeNotificationBaseline();
 }));
 
 (async function init(){
@@ -430,12 +349,10 @@ document.querySelectorAll(".destination").forEach(btn=>btn.addEventListener("cli
  personName.textContent=d.person;
  document.querySelectorAll(".destination").forEach(btn=>btn.classList.toggle("active",btn.dataset.counter===activeCounter));
  await loadCounterIds();
- updateNotificationStatus();
+ sendCounterToNotificationHelper();
  await loadActive();
  await loadWaitingCount();
- if(notificationSupported() && Notification.permission==="granted") await primeNotificationBaseline();
  setInterval(loadActive,5000);
  setInterval(loadWaitingCount,2000);
- setInterval(checkNewWaitingNotifications,3000);
 })();
 </script></body></html>
