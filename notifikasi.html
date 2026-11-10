@@ -361,10 +361,10 @@ async function checkNewQueues(){
     }
 
     const newIds=[...currentIds].filter(id=>!knownWaitingIds.has(id));
-    knownWaitingIds=currentIds;
 
     // Detail hanya diminta jika benar-benar ada antrean baru.
     const newQueues=await getWaitingDetails(newIds);
+    knownWaitingIds=currentIds;
     let notified=0;
     let latestNew=null;
 
