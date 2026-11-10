@@ -288,8 +288,6 @@ async function loadActive(){
   content.innerHTML='<div class="empty">Gagal memuat antrean.</div>';
   showError("KESALAHAN MEMUAT ANTREAN",e);
  }
- await loadWaitingCount();
- await loadWaitingDetails();
 }
 
 async function callNext(){
