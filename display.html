@@ -417,15 +417,12 @@ function isServiceHours(){
 function refreshDuringService(){
   if(document.hidden || !isServiceHours()) return;
   refresh();
+}
+if(isServiceHours()){
+  refresh();
   refreshWaiting();
 }
-refreshDuringService();
-setInterval(() => {
-  if(isServiceHours()) refreshDuringService();
-},5000);
-setInterval(() => {
-  if(!isServiceHours() && window.speechSynthesis) window.speechSynthesis.cancel();
-},60000);
+setInterval(refreshDuringService,5000);
 setInterval(() => {
   if(!document.hidden && isServiceHours()) refreshWaiting();
 },15000);
