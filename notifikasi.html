@@ -145,6 +145,8 @@ if(channel){
     const data=event.data||{};
     if(data.type==="set_counter" && data.counter && destinationData[data.counter]){
       activeCounter=data.counter;
+      cachedCounterId=null;
+      cachedCounterCode=null;
       destination.textContent=destinationData[activeCounter].title+" — "+destinationData[activeCounter].person;
     }
   };
@@ -200,7 +202,12 @@ function updateMonitor(count,extra=""){
   );
 }
 
+let cachedCounterId=null;
+let cachedCounterCode=null;
+
 async function getCounterId(){
+  if(cachedCounterId && cachedCounterCode===activeCounter)return cachedCounterId;
+
   const url=SUPABASE_URL+
     "/rest/v1/counters?select=id,code&is_active=eq.true&code=eq."+
     encodeURIComponent(activeCounter);
@@ -217,14 +224,19 @@ async function getCounterId(){
   if(!r.ok)throw new Error("Gagal membaca loket: HTTP "+r.status);
   const rows=await r.json();
   if(!rows.length)throw new Error("Loket "+activeCounter+" tidak ditemukan atau tidak aktif.");
-  return rows[0].id;
+  cachedCounterId=rows[0].id;
+  cachedCounterCode=activeCounter;
+  return cachedCounterId;
 }
 
-async function getWaiting(){
+async function getWaiting(includeDetails=true){
   const counterId=await getCounterId();
+  const fields=includeDetails
+    ? "id,queue_code,customer_name,service_id,maksud_audiensi,created_at,services(name)"
+    : "id";
 
   const url=SUPABASE_URL+
-    "/rest/v1/queues?select=id,queue_code,customer_name,service_id,maksud_audiensi,created_at,services(name)"+
+    "/rest/v1/queues?select="+fields+
     "&queue_date=eq."+encodeURIComponent(todayLocal())+
     "&counter_id=eq."+encodeURIComponent(counterId)+
     "&status=eq.waiting"+
@@ -245,6 +257,30 @@ async function getWaiting(){
 
   const rows=await r.json();
   if(!Array.isArray(rows))throw new Error("Respons antrean tidak berbentuk daftar.");
+  return rows;
+}
+
+async function getWaitingDetails(ids){
+  if(!ids.length)return [];
+  const counterId=await getCounterId();
+  const url=SUPABASE_URL+
+    "/rest/v1/queues?select=id,queue_code,customer_name,maksud_audiensi,services(name)"+
+    "&id=in.("+ids.map(id=>encodeURIComponent(String(id))).join(",")+")"+
+    "&counter_id=eq."+encodeURIComponent(counterId);
+
+  const r=await fetch(url,{
+    cache:"no-store",
+    headers:{
+      apikey:SUPABASE_KEY,
+      Authorization:"Bearer "+SUPABASE_KEY,
+      Accept:"application/json"
+    }
+  });
+  if(!r.ok){
+    throw new Error("Gagal membaca detail antrean baru: HTTP "+r.status+" - "+await r.text());
+  }
+  const rows=await r.json();
+  if(!Array.isArray(rows))throw new Error("Respons detail antrean tidak berbentuk daftar.");
   return rows;
 }
 
@@ -298,7 +334,7 @@ async function establishBaseline(){
 }
 
 async function checkNewQueues(){
-  if(busy)return;
+  if(busy || document.hidden)return;
 
   if(!("Notification" in window)){
     setMonitor("🔴 Browser tidak mendukung notifikasi desktop.","err");
@@ -313,34 +349,35 @@ async function checkNewQueues(){
   busy=true;
 
   try{
-    const rows=await getWaiting();
-    const currentIds=new Set(rows.map(q=>String(q.id)));
+    // Polling rutin hanya mengambil ID untuk menghemat Egress.
+    const idRows=await getWaiting(false);
+    const currentIds=new Set(idRows.map(q=>String(q.id)));
 
     if(!baselineReady){
       knownWaitingIds=currentIds;
       baselineReady=true;
-      updateMonitor(rows.length,"Baseline antrean berhasil disiapkan.");
+      updateMonitor(idRows.length,"Baseline antrean berhasil disiapkan.");
       return;
     }
 
+    const newIds=[...currentIds].filter(id=>!knownWaitingIds.has(id));
+
+    // Detail hanya diminta jika benar-benar ada antrean baru.
+    const newQueues=await getWaitingDetails(newIds);
+    knownWaitingIds=currentIds;
     let notified=0;
     let latestNew=null;
 
-    for(const q of rows){
-      const id=String(q.id);
-      if(!knownWaitingIds.has(id)){
-        if(showQueueNotification(q)){
-          notified++;
-          latestNew=q;
-        }
+    for(const q of newQueues){
+      if(showQueueNotification(q)){
+        notified++;
+        latestNew=q;
       }
     }
 
-    knownWaitingIds=currentIds;
-
     if(notified){
       updateMonitor(
-        rows.length,
+        idRows.length,
         "🔔 Notifikasi dikirim: <strong>"+notified+
         "</strong> antrean baru"+
         (latestNew
@@ -348,7 +385,7 @@ async function checkNewQueues(){
           : "")
       );
     }else{
-      updateMonitor(rows.length);
+      updateMonitor(idRows.length);
     }
 
   }catch(e){
@@ -420,9 +457,15 @@ async function startMonitoring(){
   }
 
   await establishBaseline();
-  setInterval(checkNewQueues,3000);
+  setInterval(checkNewQueues,5000);
   checkNewQueues();
 }
+
+document.addEventListener("visibilitychange",()=>{
+  if(!document.hidden && Notification.permission==="granted"){
+    checkNewQueues();
+  }
+});
 
 startMonitoring();
 

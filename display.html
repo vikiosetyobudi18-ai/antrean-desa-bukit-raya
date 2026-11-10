@@ -356,9 +356,32 @@ async function loadCounter(code){
   }
 }
 
+let refreshInProgress = false;
+let waitingRefreshInProgress = false;
+
 async function refresh(){
-  await Promise.all(COUNTERS.flatMap(code => [loadCounter(code), loadWaiting(code)]));
+  if(refreshInProgress || document.hidden) return;
+  refreshInProgress = true;
+  try{
+    await Promise.all(COUNTERS.map(code => loadCounter(code)));
+  }finally{
+    refreshInProgress = false;
+  }
 }
+
+async function refreshWaiting(){
+  if(waitingRefreshInProgress || document.hidden) return;
+  waitingRefreshInProgress = true;
+  try{
+    await Promise.all(COUNTERS.map(code => loadWaiting(code)));
+  }finally{
+    waitingRefreshInProgress = false;
+  }
+}
+
+document.addEventListener("visibilitychange", () => {
+  if(!document.hidden) refreshDuringService();
+});
 
 document.getElementById("soundButton").addEventListener("click", () => {
   suaraAktif = true;
@@ -383,8 +406,26 @@ function clock(){
     " • " +
     d.toLocaleTimeString("id-ID", {hour:"2-digit",minute:"2-digit",second:"2-digit"});
 }
-refresh();
-setInterval(refresh,1000);
+
+// Display hanya mengambil data pada hari kerja pukul 08.00–15.30 waktu lokal (WITA untuk Bukit Raya).
+function isServiceHours(){
+  const now = new Date();
+  const day = now.getDay();
+  const minutes = now.getHours() * 60 + now.getMinutes();
+  return day >= 1 && day <= 5 && minutes >= 480 && minutes < 930;
+}
+function refreshDuringService(){
+  if(document.hidden || !isServiceHours()) return;
+  refresh();
+}
+if(isServiceHours()){
+  refresh();
+  refreshWaiting();
+}
+setInterval(refreshDuringService,5000);
+setInterval(() => {
+  if(!document.hidden && isServiceHours()) refreshWaiting();
+},15000);
 </script>
 </body>
 </html>

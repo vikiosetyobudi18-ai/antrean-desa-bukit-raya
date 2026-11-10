@@ -68,6 +68,9 @@ const destinationData={
 
 let activeCounter=FIXED_COUNTER||"B";
 let activeQueue=null;
+let activeLoadInProgress=false;
+let actionInProgress=false;
+let reloadAfterActiveLoad=false;
 
 const content=document.getElementById("queueContent");
 const message=document.getElementById("message");
@@ -135,45 +138,88 @@ function speak(data){
 }
 
 async function loadActive(){
+ if(document.hidden || actionInProgress){
+  return;
+ }
+ if(activeLoadInProgress){
+  reloadAfterActiveLoad=true;
+  return;
+ }
+ activeLoadInProgress=true;
+ const requestedCounter=activeCounter;
  clearError();
  try{
-  const raw=await rpc("get_antrean_aktif_loket",{p_counter_code:activeCounter});
+  const raw=await rpc("get_antrean_aktif_loket",{p_counter_code:requestedCounter});
+  if(requestedCounter!==activeCounter || actionInProgress)return;
   const data=typeof raw==="string"?JSON.parse(raw):raw;
   renderQueue(data);
  }catch(e){
-  content.innerHTML='<div class="empty">Gagal memuat antrean.</div>';
-  showError("KESALAHAN MEMUAT ANTREAN",e);
+  if(requestedCounter===activeCounter){
+   content.innerHTML='<div class="empty">Gagal memuat antrean.</div>';
+   showError("KESALAHAN MEMUAT ANTREAN",e);
+  }
+ }finally{
+  activeLoadInProgress=false;
+  if(reloadAfterActiveLoad){
+   reloadAfterActiveLoad=false;
+   if(!document.hidden && !actionInProgress) loadActive();
+  }
  }
 }
 
+function setActionBusy(busy){
+ actionInProgress=busy;
+ btnNext.disabled=busy;
+ btnRecall.disabled=busy||!activeQueue;
+ btnStart.disabled=busy||!activeQueue||activeQueue.status!=="called";
+ btnDone.disabled=busy||!activeQueue||!["called","serving"].includes(activeQueue.status);
+ btnSkip.disabled=busy||!activeQueue||!["called","serving"].includes(activeQueue.status);
+}
 async function callNext(){
- clearError();btnNext.disabled=true;showMessage("Memanggil antrean berikutnya...");
+ if(actionInProgress)return;
+ clearError();setActionBusy(true);showMessage("Memanggil antrean berikutnya...");
+ const requestedCounter=activeCounter;
  try{
-  const raw=await rpc("panggil_antrean",{p_counter_code:activeCounter});
+  const raw=await rpc("panggil_antrean",{p_counter_code:requestedCounter});
+  if(requestedCounter!==activeCounter)return;
   if(!Array.isArray(raw)||!raw.length)throw new Error("Tidak ada antrean yang menunggu.");
   renderQueue(raw[0]);speak(raw[0]);showMessage("Antrean berhasil dipanggil.");
  }catch(e){showMessage("Gagal memanggil antrean.");showError("KESALAHAN PANGGIL ANTREAN",e)}
- finally{btnNext.disabled=false}
+ finally{setActionBusy(false);if(!document.hidden)await loadActive()}
 }
 async function recall(){
- if(!activeQueue)return;
- try{const raw=await rpc("panggil_ulang_antrean",{p_queue_id:activeQueue.queue_id});if(Array.isArray(raw)&&raw.length){renderQueue(raw[0]);speak(raw[0]);showMessage("Antrean dipanggil ulang.")}}
- catch(e){showError("KESALAHAN PANGGIL ULANG",e)}
+ if(!activeQueue||actionInProgress)return;
+ const queueId=activeQueue.queue_id;
+ setActionBusy(true);
+ try{
+  const raw=await rpc("panggil_ulang_antrean",{p_queue_id:queueId});
+  if(Array.isArray(raw)&&raw.length){renderQueue(raw[0]);speak(raw[0]);showMessage("Antrean dipanggil ulang.")}
+ }catch(e){showError("KESALAHAN PANGGIL ULANG",e)}
+ finally{setActionBusy(false);if(!document.hidden)await loadActive()}
 }
 async function start(){
- if(!activeQueue)return;
- try{await rpc("mulai_layani_antrean",{p_queue_id:activeQueue.queue_id});showMessage("Antrean sedang dilayani.");await loadActive()}
+ if(!activeQueue||actionInProgress)return;
+ const queueId=activeQueue.queue_id;
+ setActionBusy(true);
+ try{await rpc("mulai_layani_antrean",{p_queue_id:queueId});showMessage("Antrean sedang dilayani.")}
  catch(e){showError("KESALAHAN MULAI MELAYANI",e)}
+ finally{setActionBusy(false);if(!document.hidden)await loadActive()}
 }
 async function done(){
- if(!activeQueue)return;
- try{await rpc("selesaikan_antrean",{p_queue_id:activeQueue.queue_id});activeQueue=null;showMessage("Pelayanan selesai.");await loadActive()}
+ if(!activeQueue||actionInProgress)return;
+ const queueId=activeQueue.queue_id;
+ setActionBusy(true);
+ try{await rpc("selesaikan_antrean",{p_queue_id:queueId});activeQueue=null;showMessage("Pelayanan selesai.")}
  catch(e){showError("KESALAHAN SELESAI",e)}
+ finally{setActionBusy(false);if(!document.hidden)await loadActive()}
 }
 async function skip(){
- if(!activeQueue)return;
- try{await rpc("lewati_antrean",{p_queue_id:activeQueue.queue_id});activeQueue=null;showMessage("Antrean dilewati.");await loadActive()}
+ if(!activeQueue||actionInProgress)return;
+ const queueId=activeQueue.queue_id;
+ setActionBusy(true);
+ try{await rpc("lewati_antrean",{p_queue_id:queueId});activeQueue=null;showMessage("Antrean dilewati.")}
  catch(e){showError("KESALAHAN LEWATI",e)}
+ finally{setActionBusy(false);if(!document.hidden)await loadActive()}
 }
 
 btnNext.addEventListener("click",callNext);
@@ -183,6 +229,7 @@ btnDone.addEventListener("click",done);
 btnSkip.addEventListener("click",skip);
 
 document.querySelectorAll(".destination").forEach(btn=>btn.addEventListener("click",async()=>{
+ if(actionInProgress)return;
  activeCounter=btn.dataset.counter;
  document.querySelectorAll(".destination").forEach(x=>x.classList.remove("active"));
  btn.classList.add("active");
@@ -190,8 +237,17 @@ document.querySelectorAll(".destination").forEach(btn=>btn.addEventListener("cli
  destinationTitle.textContent=d.title;
  personName.textContent=d.person;
  activeQueue=null;
+ btnRecall.disabled=btnStart.disabled=btnDone.disabled=btnSkip.disabled=true;
+ if(activeLoadInProgress){
+  reloadAfterActiveLoad=true;
+  return;
+ }
  await loadActive();
 }));
+
+document.addEventListener("visibilitychange",()=>{
+ if(!document.hidden)loadActive();
+});
 
 (function init(){
  const d=destinationData[activeCounter];
@@ -199,6 +255,8 @@ document.querySelectorAll(".destination").forEach(btn=>btn.addEventListener("cli
  personName.textContent=d.person;
  document.querySelectorAll(".destination").forEach(btn=>btn.classList.toggle("active",btn.dataset.counter===activeCounter));
  loadActive();
- setInterval(loadActive,5000);
+ setInterval(()=>{
+  if(!document.hidden)loadActive();
+ },5000);
 })();
 </script></body></html>
