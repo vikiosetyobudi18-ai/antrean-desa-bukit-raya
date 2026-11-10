@@ -334,8 +334,7 @@ document.querySelectorAll(".destination").forEach(btn=>btn.addEventListener("cli
  destinationTitle.textContent=d.title;
  personName.textContent=d.person;
  activeQueue=null;
- await loadActive();
- await loadWaitingCount();
+ await Promise.all([loadActive(),loadWaitingCount(),loadWaitingDetails()]);
 }));
 
 (async function init(){
@@ -344,10 +343,9 @@ document.querySelectorAll(".destination").forEach(btn=>btn.addEventListener("cli
  personName.textContent=d.person;
  document.querySelectorAll(".destination").forEach(btn=>btn.classList.toggle("active",btn.dataset.counter===activeCounter));
  await loadCounterIds();
- await loadActive();
- await loadWaitingCount();
+ await Promise.all([loadActive(),loadWaitingCount(),loadWaitingDetails()]);
  setInterval(loadActive,5000);
- setInterval(loadWaitingCount,2000);
- setInterval(loadWaitingDetails,3000);
+ setInterval(loadWaitingCount,10000);
+ setInterval(loadWaitingDetails,10000);
 })();
 </script></body></html>
