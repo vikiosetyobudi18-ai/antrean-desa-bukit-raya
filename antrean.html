@@ -150,7 +150,7 @@ async function loadActive(){
  clearError();
  try{
   const raw=await rpc("get_antrean_aktif_loket",{p_counter_code:requestedCounter});
-  if(requestedCounter!==activeCounter)return;
+  if(requestedCounter!==activeCounter || actionInProgress)return;
   const data=typeof raw==="string"?JSON.parse(raw):raw;
   renderQueue(data);
  }catch(e){
