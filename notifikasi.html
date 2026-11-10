@@ -334,7 +334,7 @@ async function establishBaseline(){
 }
 
 async function checkNewQueues(){
-  if(busy)return;
+  if(busy || document.hidden)return;
 
   if(!("Notification" in window)){
     setMonitor("🔴 Browser tidak mendukung notifikasi desktop.","err");
@@ -460,6 +460,12 @@ async function startMonitoring(){
   setInterval(checkNewQueues,5000);
   checkNewQueues();
 }
+
+document.addEventListener("visibilitychange",()=>{
+  if(!document.hidden && Notification.permission==="granted"){
+    checkNewQueues();
+  }
+});
 
 startMonitoring();
 
