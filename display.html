@@ -407,7 +407,7 @@ function clock(){
     d.toLocaleTimeString("id-ID", {hour:"2-digit",minute:"2-digit",second:"2-digit"});
 }
 
-// Display hanya mengambil data pada hari kerja pukul 08.00–15.30 WIB.
+// Display hanya mengambil data pada hari kerja pukul 08.00–15.30 waktu lokal (WITA untuk Bukit Raya).
 function isServiceHours(){
   const now = new Date();
   const day = now.getDay();
