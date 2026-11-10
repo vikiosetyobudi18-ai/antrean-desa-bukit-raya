@@ -124,6 +124,9 @@ let counterIds={};
 let activeLoading=false;
 let waitingCountLoading=false;
 let waitingDetailsLoading=false;
+let activeReloadPending=false;
+let waitingCountReloadPending=false;
+let waitingDetailsReloadPending=false;
 
 function esc(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
 function showMessage(t){message.textContent=t||"";}
@@ -194,7 +197,8 @@ async function loadCounterIds(){
 }
 
 async function loadWaitingCount(){
- if(waitingCountLoading||document.hidden)return;
+ if(document.hidden)return;
+ if(waitingCountLoading){waitingCountReloadPending=true;return;}
  waitingCountLoading=true;
  const requestedCounter=activeCounter;
  try{
@@ -225,8 +229,11 @@ async function loadWaitingCount(){
   // Jangan ubah tampilan saat polling gagal sesaat.
  }finally{
   waitingCountLoading=false;
+  if(waitingCountReloadPending){
+   waitingCountReloadPending=false;
+   if(!document.hidden)loadWaitingCount();
+  }
  }
-}
 
 
 function serviceCategory(serviceName,counterCode){
@@ -248,7 +255,8 @@ function todayLocalDate(){
  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 }
 async function loadWaitingDetails(){
- if(waitingDetailsLoading||document.hidden)return;
+ if(document.hidden)return;
+ if(waitingDetailsLoading){waitingDetailsReloadPending=true;return;}
  waitingDetailsLoading=true;
  const requestedCounter=activeCounter;
  try{
@@ -292,11 +300,16 @@ ${audiensi&&q.maksud_audiensi?`<div class="waiting-purpose"><strong>Maksud audie
   }
  }finally{
   waitingDetailsLoading=false;
+  if(waitingDetailsReloadPending){
+   waitingDetailsReloadPending=false;
+   if(!document.hidden)loadWaitingDetails();
+  }
  }
 }
 
 async function loadActive(){
- if(activeLoading||document.hidden)return;
+ if(document.hidden)return;
+ if(activeLoading){activeReloadPending=true;return;}
  activeLoading=true;
  const requestedCounter=activeCounter;
  clearError();
@@ -312,6 +325,10 @@ async function loadActive(){
   }
  }finally{
   activeLoading=false;
+  if(activeReloadPending){
+   activeReloadPending=false;
+   if(!document.hidden)loadActive();
+  }
  }
 }
 
