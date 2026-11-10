@@ -356,9 +356,21 @@ async function loadCounter(code){
   }
 }
 
+let refreshInProgress = false;
+
 async function refresh(){
-  await Promise.all(COUNTERS.flatMap(code => [loadCounter(code), loadWaiting(code)]));
+  if(refreshInProgress || document.hidden) return;
+  refreshInProgress = true;
+  try{
+    await Promise.all(COUNTERS.flatMap(code => [loadCounter(code), loadWaiting(code)]));
+  }finally{
+    refreshInProgress = false;
+  }
 }
+
+document.addEventListener("visibilitychange", () => {
+  if(!document.hidden) refresh();
+});
 
 document.getElementById("soundButton").addEventListener("click", () => {
   suaraAktif = true;
@@ -384,7 +396,7 @@ function clock(){
     d.toLocaleTimeString("id-ID", {hour:"2-digit",minute:"2-digit",second:"2-digit"});
 }
 refresh();
-setInterval(refresh,1000);
+setInterval(refresh,5000);
 </script>
 </body>
 </html>
