@@ -357,19 +357,33 @@ async function loadCounter(code){
 }
 
 let refreshInProgress = false;
+let waitingRefreshInProgress = false;
 
 async function refresh(){
   if(refreshInProgress || document.hidden) return;
   refreshInProgress = true;
   try{
-    await Promise.all(COUNTERS.flatMap(code => [loadCounter(code), loadWaiting(code)]));
+    await Promise.all(COUNTERS.map(code => loadCounter(code)));
   }finally{
     refreshInProgress = false;
   }
 }
 
+async function refreshWaiting(){
+  if(waitingRefreshInProgress || document.hidden) return;
+  waitingRefreshInProgress = true;
+  try{
+    await Promise.all(COUNTERS.map(code => loadWaiting(code)));
+  }finally{
+    waitingRefreshInProgress = false;
+  }
+}
+
 document.addEventListener("visibilitychange", () => {
-  if(!document.hidden) refresh();
+  if(!document.hidden){
+    refresh();
+    refreshWaiting();
+  }
 });
 
 document.getElementById("soundButton").addEventListener("click", () => {
@@ -396,7 +410,9 @@ function clock(){
     d.toLocaleTimeString("id-ID", {hour:"2-digit",minute:"2-digit",second:"2-digit"});
 }
 refresh();
+refreshWaiting();
 setInterval(refresh,5000);
+setInterval(refreshWaiting,15000);
 </script>
 </body>
 </html>
