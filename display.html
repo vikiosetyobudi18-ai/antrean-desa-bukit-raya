@@ -407,12 +407,25 @@ function clock(){
     d.toLocaleTimeString("id-ID", {hour:"2-digit",minute:"2-digit",second:"2-digit"});
 }
 
-// Display hanya mengambil data pada hari kerja pukul 08.00–15.30 waktu lokal (WITA untuk Bukit Raya).
+// Jadwal pelayanan Desa Bukit Raya menggunakan WITA (Asia/Makassar).
+// Senin–Kamis: 08.00–15.30; Jumat: 08.00–11.30; Sabtu–Minggu: tidak aktif.
 function isServiceHours(){
-  const now = new Date();
-  const day = now.getDay();
-  const minutes = now.getHours() * 60 + now.getMinutes();
-  return day >= 1 && day <= 5 && minutes >= 480 && minutes < 930;
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Makassar",
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23"
+  }).formatToParts(new Date());
+
+  const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
+  const day = values.weekday;
+  const minutes = Number(values.hour) * 60 + Number(values.minute);
+
+  if(minutes < 480) return false;
+  if(["Mon", "Tue", "Wed", "Thu"].includes(day)) return minutes < 930;
+  if(day === "Fri") return minutes < 690;
+  return false;
 }
 function refreshDuringService(){
   if(document.hidden || !isServiceHours()) return;
