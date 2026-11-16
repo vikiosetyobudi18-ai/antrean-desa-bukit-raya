@@ -315,44 +315,66 @@ function speak(code, data){
   }, 700);
 }
 
-async function loadWaiting(code){
+async function loadAllWaiting(){
   try{
-    const raw = await rpc("get_jumlah_antrean_menunggu", {p_counter_code:code});
-    let data = raw;
-    if(typeof data === "string"){
-      try{ data = JSON.parse(data); }catch{ data = null; }
+    const raw = await rpc("get_jumlah_antrean_menunggu_semua_loket", {});
+    let rows = raw;
+    if(typeof rows === "string"){
+      try{ rows = JSON.parse(rows); }catch{ rows = []; }
     }
-    const count = Number(data?.jumlah_menunggu ?? 0);
-    if(lastWaiting[code] === count) return;
-    lastWaiting[code] = count;
+    if(!Array.isArray(rows)) throw new Error("Format jumlah antrean tidak sesuai");
 
-    const waiting = document.getElementById("waiting-" + code);
-    if(waiting){
-      waiting.textContent = "MENUNGGU: " + count;
-    }
+    const counts = new Map(rows.map(item => [
+      String(item.counter_code || "").toUpperCase(),
+      Number(item.jumlah_menunggu ?? 0)
+    ]));
+
+    COUNTERS.forEach(code => {
+      const count = counts.has(code) ? counts.get(code) : 0;
+      if(lastWaiting[code] === count) return;
+      lastWaiting[code] = count;
+
+      const waiting = document.getElementById("waiting-" + code);
+      if(waiting) waiting.textContent = "MENUNGGU: " + count;
+    });
   }catch(e){
-    console.error("Waiting " + code, e);
+    console.error("Waiting all counters", e);
   }
 }
 
-async function loadCounter(code){
+async function loadAllCounters(){
   try{
-    const raw = await rpc("get_antrean_aktif_loket", {p_counter_code:code});
-    const data = normalize(raw);
-    const previous = lastState[code];
-    updateCard(code, data);
-
-    const newCall = data && (!previous || String(previous.call_id) !== String(data.call_id));
-    if(newCall){
-      const card = document.getElementById("card-" + code);
-      card.classList.remove("flash");
-      void card.offsetWidth;
-      card.classList.add("flash");
-      speak(code, data);
+    const raw = await rpc("get_antrean_aktif_semua_loket", {});
+    let rows = raw;
+    if(typeof rows === "string"){
+      try{ rows = JSON.parse(rows); }catch{ rows = []; }
     }
-    lastState[code] = data;
+    if(!Array.isArray(rows)) throw new Error("Format antrean aktif tidak sesuai");
+
+    const activeByCounter = new Map(
+      rows.map(item => [
+        String(item.counter_code || "").toUpperCase(),
+        normalize(item.active)
+      ])
+    );
+
+    COUNTERS.forEach(code => {
+      const data = activeByCounter.get(code) || null;
+      const previous = lastState[code];
+      updateCard(code, data);
+
+      const newCall = data && (!previous || String(previous.call_id) !== String(data.call_id));
+      if(newCall){
+        const card = document.getElementById("card-" + code);
+        card.classList.remove("flash");
+        void card.offsetWidth;
+        card.classList.add("flash");
+        speak(code, data);
+      }
+      lastState[code] = data;
+    });
   }catch(e){
-    console.error("Display " + code, e);
+    console.error("Display all counters", e);
   }
 }
 
@@ -363,7 +385,7 @@ async function refresh(){
   if(refreshInProgress || document.hidden) return;
   refreshInProgress = true;
   try{
-    await Promise.all(COUNTERS.map(code => loadCounter(code)));
+    await loadAllCounters();
   }finally{
     refreshInProgress = false;
   }
@@ -373,7 +395,7 @@ async function refreshWaiting(){
   if(waitingRefreshInProgress || document.hidden) return;
   waitingRefreshInProgress = true;
   try{
-    await Promise.all(COUNTERS.map(code => loadWaiting(code)));
+    await loadAllWaiting();
   }finally{
     waitingRefreshInProgress = false;
   }
